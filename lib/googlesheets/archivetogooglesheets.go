@@ -13,6 +13,7 @@ import (
 
 
 const CredentialsForGoogle = `./lib/googlesheets/auth.json`
+const MonthHeaderRow = 2
 
 
 
@@ -64,11 +65,14 @@ func EnsureMonthColumnExists(sheetID int64, month, year, spreadsheetID string, s
 		return 0, fmt.Errorf("Error getting month headings for %s: %s", monthsRange, err)
 	}
 
+	indexOfFirstMonth := 1
+
+	// No Month Heading in first results column, so just use that column
 	if len(resp.Values) < 1 {
-		return 0, fmt.Errorf("Error getting month headings for %s. Make sure there is a month heading in B2", year)
+		err := WriteToCellWithColumnIndex(MonthHeaderRow, int64(indexOfFirstMonth), monthHeader, year, spreadsheetID, srv)
+		return indexOfFirstMonth, err
 	}
 
-	indexOfFirstMonth := 1
 	chosenColumn := 0
 	lastIndex := 0
 	for index, value := range resp.Values[0] {
@@ -87,7 +91,7 @@ func EnsureMonthColumnExists(sheetID int64, month, year, spreadsheetID string, s
 		if desiredMonthPosition < colMonthPosition {
 			chosenColumn = index + indexOfFirstMonth
 			InsertColumn(int64(chosenColumn), sheetID, spreadsheetID, srv)
-			err := WriteToCellWithColumnIndex(2, int64(chosenColumn), monthHeader, year, spreadsheetID, srv)
+			err := WriteToCellWithColumnIndex(MonthHeaderRow, int64(chosenColumn), monthHeader, year, spreadsheetID, srv)
 			return chosenColumn, err
 		}
 	}
@@ -97,7 +101,7 @@ func EnsureMonthColumnExists(sheetID int64, month, year, spreadsheetID string, s
 		chosenColumn = lastIndex + indexOfFirstMonth + 1
 	}
 
-	err = WriteToCellWithColumnIndex(2, int64(chosenColumn), monthHeader, year, spreadsheetID, srv)
+	err = WriteToCellWithColumnIndex(MonthHeaderRow, int64(chosenColumn), monthHeader, year, spreadsheetID, srv)
 	return chosenColumn, err
 }
 
@@ -109,12 +113,16 @@ func EnsureCheckRowExists(sheetID int64, nodepingCheck, year, spreadsheetID stri
 		return 0, fmt.Errorf("Error getting Nodeping Check names for %s: %s", nodepingCheck, err)
 	}
 
+
+	indexOfFirstCheck := 3
+
+	// No Check Heading in first row, so just use that row
 	if len(resp.Values) < 1 {
-		return 0, fmt.Errorf("Error getting Nodeping Check names for %s. Make sure there is a name in A3 or below", year)
+		err = WriteToCellWithColumnLetter(int64(indexOfFirstCheck), "A", nodepingCheck, year, spreadsheetID, srv)
+		return indexOfFirstCheck, err
 	}
 
 	npCheckLower := strings.ToLower(nodepingCheck)
-    indexOfFirstCheck := 3
 
 	chosenRow := 0
 	lastIndex := 0
@@ -183,6 +191,7 @@ func ArchiveResultsForMonth(contactGroupName, month, year, spreadsheetID, nodePi
 		log.Fatalf("Error choosing column for %s.  %v", month, err)
 	}
 
+	index := 0
 	for nodepingCheck, percentage := range uptimeResults.Uptimes {
 		checkRow, err := EnsureCheckRowExists(sheetID, nodepingCheck, year, spreadsheetID, srv)
 		if err != nil {
@@ -190,5 +199,10 @@ func ArchiveResultsForMonth(contactGroupName, month, year, spreadsheetID, nodePi
 		}
 
 		err = WriteToCellWithColumnIndex(int64(checkRow), int64(monthColumn), fmt.Sprintf("%.3f", percentage), year, spreadsheetID, srv)
+
+		if index > 2 {
+			break
+		}
+		index += 1
 	}
 }
