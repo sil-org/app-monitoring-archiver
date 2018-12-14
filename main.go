@@ -19,5 +19,5 @@ func main() {
 		log.Fatal("Error: Environment variable for NODEPING_TOKEN is required to execute plan and migration")
 	}
 
-	googlesheets.ArchiveResultsForMonth("AppsDev Alerts", "November", "2018", spreadsheetID, nodepingToken)
+	googlesheets.ArchiveResultsForMonth("AppsDev Alerts", "LastMonth", spreadsheetID, nodepingToken, 222)
 }
