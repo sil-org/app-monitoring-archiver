@@ -178,6 +178,10 @@ func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (in
 }
 
 func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingToken string, countLimit int) {
+	if countLimit < 1 {
+		countLimit = 1000
+	}
+
 	credBytes, err := ioutil.ReadFile(CredentialsForGoogle)
 	if err != nil {
 		log.Fatalf("Unable to read google credentials file: %v", err)
