@@ -133,8 +133,8 @@ func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) {
 }
 
 
-func GetSheetIDFromTitle(spreadsheetID, title string, srv *sheets.Service) (bool, int64, error) {
-	ssResp, err := srv.Spreadsheets.Get(spreadsheetID).Do()
+func GetSheetIDFromTitle(title string, sheetsData SheetsData) (bool, int64, error) {
+	ssResp, err := sheetsData.Service.Spreadsheets.Get(sheetsData.SpreadsheetID).Do()
 
 	if err != nil {
 		return false, 0, fmt.Errorf("Error trying to find sheet %s. %v", title, err)

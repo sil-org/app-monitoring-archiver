@@ -9,16 +9,21 @@ import (
 	"google.golang.org/api/sheets/v4"
 	"strings"
 	"github.com/silinternational/nodeping-cli/lib"
+	"time"
 )
 
 
 const CredentialsForGoogle = `./lib/googlesheets/auth.json`
 const MonthHeaderRow = 2
 
+type SheetsData struct {
+	SpreadsheetID string // The ID of the whole Google Sheets file
+	SheetID int64  // The index of the individual sheet
+	Service *sheets.Service
+}
 
-
-func EnsureSheetExists(spreadsheetID, title string, srv *sheets.Service) (int64, error) {
-	doesSheetExist, sheetID, err := GetSheetIDFromTitle(spreadsheetID, title, srv)
+func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
+	doesSheetExist, sheetID, err := GetSheetIDFromTitle(sheetName, sheetsData)
 	if err != nil {
 		return 0, err
 	}
@@ -27,7 +32,7 @@ func EnsureSheetExists(spreadsheetID, title string, srv *sheets.Service) (int64,
 		request := sheets.Request{
 			AddSheet: &sheets.AddSheetRequest{
 				Properties: &sheets.SheetProperties{
-					Title: title,
+					Title: sheetName,
 				},
 			},
 		}
@@ -35,31 +40,41 @@ func EnsureSheetExists(spreadsheetID, title string, srv *sheets.Service) (int64,
 		rbb := &sheets.BatchUpdateSpreadsheetRequest{
 			Requests: []*sheets.Request{&request},
 		}
+
+		spreadsheetID := sheetsData.SpreadsheetID
+		srv := sheetsData.Service
 		_, err := srv.Spreadsheets.BatchUpdate(spreadsheetID, rbb).Context(context.Background()).Do()
 		if err != nil {
-			return 0, fmt.Errorf("Unable to create new sheet %s. %s", title, err)
+			return 0, fmt.Errorf("Unable to create new sheet %s. %s", sheetName, err)
 		}
+
+		_ = WriteToCellWithColumnLetter(1, "B", "Uptime Percent", sheetName, spreadsheetID, srv)
+		_ = WriteToCellWithColumnLetter(2, "A", "Checks", sheetName, spreadsheetID, srv)
 	}
 
-	doesSheetExist, sheetID, err = GetSheetIDFromTitle(spreadsheetID, title, srv)
+	doesSheetExist, sheetID, err = GetSheetIDFromTitle(sheetName, sheetsData)
 	if err != nil {
-		return 0, fmt.Errorf("Error finding newly created sheet %s. %v", title, err)
+		return 0, fmt.Errorf("Error finding newly created sheet %s. %v", sheetName, err)
 	}
 
 	if ! doesSheetExist {
-		return 0, fmt.Errorf("Unable to find newly created sheet %s.", title)
+		return 0, fmt.Errorf("Unable to find newly created sheet %s.", sheetName)
 	}
 
 	return sheetID, nil
 }
 
 
-func EnsureMonthColumnExists(sheetID int64, month, year, spreadsheetID string, srv *sheets.Service) (int, error) {
+func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, error) {
 
 	desiredMonthPosition, err := GetMonthPosition(month)
 	monthHeader := fmt.Sprintf("%s %s", month, year)
 
 	monthsRange := fmt.Sprintf("%s!B2:Z2", year)
+	srv := sheetsData.Service
+	spreadsheetID := sheetsData.SpreadsheetID
+	sheetID := sheetsData.SheetID
+
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, monthsRange).Do()
 	if err != nil {
 		return 0, fmt.Errorf("Error getting month headings for %s: %s", monthsRange, err)
@@ -106,8 +121,12 @@ func EnsureMonthColumnExists(sheetID int64, month, year, spreadsheetID string, s
 }
 
 
-func EnsureCheckRowExists(sheetID int64, nodepingCheck, year, spreadsheetID string, srv *sheets.Service) (int, error) {
+func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (int, error) {
 	checksRange := fmt.Sprintf("%s!A3:A100", year)
+	srv := sheetsData.Service
+	spreadsheetID := sheetsData.SpreadsheetID
+	sheetID := sheetsData.SheetID
+
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, checksRange).Do()
 	if err != nil {
 		return 0, fmt.Errorf("Error getting Nodeping Check names for %s: %s", nodepingCheck, err)
@@ -158,7 +177,7 @@ func EnsureCheckRowExists(sheetID int64, nodepingCheck, year, spreadsheetID stri
 	return chosenRow, err
 }
 
-func ArchiveResultsForMonth(contactGroupName, month, year, spreadsheetID, nodePingToken string) {
+func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingToken string, countLimit int) {
 	credBytes, err := ioutil.ReadFile(CredentialsForGoogle)
 	if err != nil {
 		log.Fatalf("Unable to read google credentials file: %v", err)
@@ -175,34 +194,59 @@ func ArchiveResultsForMonth(contactGroupName, month, year, spreadsheetID, nodePi
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
-	sheetID, err := EnsureSheetExists(spreadsheetID, year, srv)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-
-	uptimeResults, err := lib.GetUptimesForContactGroup(nodePingToken, contactGroupName, "LastMonth")
+	uptimeResults, err := lib.GetUptimesForContactGroup(nodePingToken, contactGroupName, period)
 	if err != nil {
 		log.Fatalf("Error getting Nodeping results.  %v", err)
 	}
 
-	monthColumn, err := EnsureMonthColumnExists(sheetID, month, year, spreadsheetID, srv)
+	// Get the human readable form of the month and year
+	monthTime := uptimeResults.StartTime + 86400  // Add seconds per day to ensure time zone issues don't point to previous month
+	month := time.Unix(monthTime, 0).Format("January")
+	year := time.Unix(monthTime, 0).Format("2006")
+
+	sheetsData := SheetsData{
+		SpreadsheetID: spreadsheetID,
+		Service: srv,
+	}
+
+
+	sheetID, err := EnsureSheetExists(year, sheetsData)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	sheetsData.SheetID = sheetID
+
+	monthColumn, err := EnsureMonthColumnExists(month, year, sheetsData)
 	if err != nil {
 		log.Fatalf("Error choosing column for %s.  %v", month, err)
 	}
 
-	index := 0
+	index := 1
+	delaySeconds := time.Duration(22)
+
 	for nodepingCheck, percentage := range uptimeResults.Uptimes {
-		checkRow, err := EnsureCheckRowExists(sheetID, nodepingCheck, year, spreadsheetID, srv)
+		if index > countLimit {
+			break
+		}
+
+		// The quota is 100 writes per 100 seconds per user
+		if index % 20 == 0 {
+			fmt.Printf("Waiting %v seconds at index %d to avoid Google Api rate limiting.\n", delaySeconds.Seconds(), index)
+			time.Sleep(time.Second * delaySeconds)
+		}
+
+		checkRow, err := EnsureCheckRowExists(nodepingCheck, year, sheetsData)
 		if err != nil {
 			log.Fatalf("Error adding row for %s", nodepingCheck)
 		}
 
-		err = WriteToCellWithColumnIndex(int64(checkRow), int64(monthColumn), fmt.Sprintf("%.3f", percentage), year, spreadsheetID, srv)
+		err = WriteToCellWithColumnIndex(
+			int64(checkRow), int64(monthColumn),
+			fmt.Sprintf("%.3f", percentage), year,
+			spreadsheetID, srv,
+		)
 
-		if index > 2 {
-			break
-		}
 		index += 1
 	}
 }
