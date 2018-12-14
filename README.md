@@ -26,8 +26,11 @@ service account by following the instuctions at https://flaviocopes.com/google-a
  Note: There is a 100 writes per 100 seconds rate limit on Google Sheets.
 
 ### Set environment variables
+
+```sh
 $ export NODEPING_TOKEN=EG123ABC
 $ export SPREADSHEET_ID=EG123ABC
+```
 
 The SPREADSHEET_ID is the middle part of the url for the target Google Sheet when you just browse to it.
 
