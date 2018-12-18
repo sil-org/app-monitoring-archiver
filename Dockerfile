@@ -7,10 +7,7 @@ RUN go get -u github.com/golang/dep/cmd/dep
 
 # Copy in source and install deps
 RUN mkdir -p /go/src/github.com/silinternational/app-monitoring-archiver
-COPY ./Gopkg.toml /go/src/github.com/silinternational/app-monitoring-archiver/
-COPY ./Gopkg.lock /go/src/github.com/silinternational/app-monitoring-archiver/
-COPY ./package.json /go/src/github.com/silinternational/app-monitoring-archiver/
-WORKDIR /go/src/github.com/silinternational/app-monitoring-archiver
 RUN npm install -g serverless && npm install
 COPY ./ /go/src/github.com/silinternational/app-monitoring-archiver/
+WORKDIR /go/src/github.com/silinternational/app-monitoring-archiver/lambda
 RUN dep ensure
