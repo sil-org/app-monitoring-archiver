@@ -48,7 +48,7 @@ functions:
     handler: archive-to-google-sheets
     events:
     - schedule:
-        cron: cron(1 1 1,8 * ? *)
+        rate: cron(1 1 1,8 * ? *)
         input:
           ContactGroupName: ${env:CONTACT_GROUP_NAME}
           CountLimit: ${env:COUNT_LIMIT}
