@@ -51,7 +51,7 @@
   name = "github.com/silinternational/nodeping-go-client"
   packages = ["."]
   pruneopts = "UT"
-  revision = "89e4717f6c46cfffe6bb231c9d5ea6fb7f32925d"
+  revision = "1c0ce78b96600170d562fce4b555a9e93904f341"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
