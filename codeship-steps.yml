@@ -1,7 +1,17 @@
-- name: deploy
+- name: deploy_dev
+  service: app
+  tag: develop
+  command: ./lambda/deploy-dev.sh
+
+- name: track_deployment
+  service: tracker
+  tag: develop
+  command: "true"
+
+- name: deploy_prod
   service: app
   tag: master
-  command: ./lambda/deploy.sh
+  command: ./lambda/deploy-prod.sh
 
 - name: track_deployment
   service: tracker
