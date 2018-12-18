@@ -3,11 +3,6 @@
   tag: develop
   command: ./lambda/deploy-dev.sh
 
-- name: track_deployment
-  service: tracker
-  tag: develop
-  command: "true"
-
 - name: deploy_prod
   service: app
   tag: master
@@ -15,5 +10,5 @@
 
 - name: track_deployment
   service: tracker
-  tag: master
+  tag: ^(master|develop)
   command: "true"

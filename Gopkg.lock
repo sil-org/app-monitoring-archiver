@@ -39,11 +39,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:55f2c4e9d45d99ec9fa46c6610b098469c8ce24239865e8dab7faffd1f938d34"
+  digest = "1:c60c483e1c0fbd3a79d671a24a6aecfe54b355a53deb1ab80a794522f70b3f7b"
   name = "github.com/silinternational/nodeping-cli"
   packages = ["lib"]
   pruneopts = "UT"
-  revision = "1ccb649cf169230ca89a8658ea44ecd85abf0fb0"
+  revision = "926fdd99f65364825fd93cd4d18f8be27df25856"
+
+[[projects]]
+  branch = "master"
+  digest = "1:a3c8972f03845197da5115363ad0537597667da6d78ea28e484fdf213a85dda0"
+  name = "github.com/silinternational/nodeping-go-client"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "89e4717f6c46cfffe6bb231c9d5ea6fb7f32925d"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
@@ -63,11 +71,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f8b491a7c25030a895a0e579742d07136e6958e77ef2d46e769db8eec4e58fcd"
+  digest = "1:accf5f2688ddcfbdc4be68e5e780082afa913d0b28e830a788779144b829d9a6"
   name = "golang.org/x/net"
   packages = [
     "context",
     "context/ctxhttp",
+    "idna",
+    "publicsuffix",
   ]
   pruneopts = "UT"
   revision = "e147a9138326bc0e9d4e179541ffd8af41cff8a9"
@@ -85,6 +95,29 @@
   ]
   pruneopts = "UT"
   revision = "d668ce993890a79bda886613ee587a69dd5da7a6"
+
+[[projects]]
+  digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
+  name = "golang.org/x/text"
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable",
+  ]
+  pruneopts = "UT"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
   branch = "master"
@@ -117,6 +150,14 @@
   pruneopts = "UT"
   revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
   version = "v1.3.0"
+
+[[projects]]
+  digest = "1:6921c024df19499cfcdaf33e0df635da67b959a4541b8b68d00d159791b70d07"
+  name = "gopkg.in/resty.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a59932b061db030cf7edc11d970c8b6013d04a32"
+  version = "v1.10.3"
 
 [solve-meta]
   analyzer-name = "dep"
