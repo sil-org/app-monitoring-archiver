@@ -47,11 +47,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a3c8972f03845197da5115363ad0537597667da6d78ea28e484fdf213a85dda0"
+  digest = "1:05e1bb6f3bb92350ea62b039e6d52381610f5be3893329ee54980c34f10b044e"
   name = "github.com/silinternational/nodeping-go-client"
   packages = ["."]
   pruneopts = "UT"
-  revision = "1c0ce78b96600170d562fce4b555a9e93904f341"
+  revision = "441c32c65ff3bb0cc2f86e3d80d82873965f15f8"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
