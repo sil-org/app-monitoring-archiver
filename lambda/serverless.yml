@@ -1,0 +1,56 @@
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service: archive-to-google-sheets
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: go1.x
+  timeout: 45
+  versionFunctions: false
+  memorySize: 128
+
+  # you can overwrite defaults here
+  #  stage: dev
+  #  region: us-east-1
+
+  # you can add statements to the Lambda function's IAM Role here
+  # iamRoleStatements:
+  # - Effect: "Allow"
+  #   Action:
+  #     - "ecs:ListServices"
+  #   Resource: "*"
+
+  # you can define service wide environment variables here
+  environment:
+    stage: ${self:custom.stage}
+    namespace: ${self:custom.namespace}
+    NODEPING_TOKEN: ${env:NODEPING_TOKEN}
+
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  namespace: ${self:service}_${self:custom.stage}
+
+
+package:
+  exclude:
+  - ./**
+  include:
+  - ./archive-to-google-sheets
+
+functions:
+  archiveToGoogleSheets:
+    handler: archive-to-google-sheets
+    events:
+    - schedule:
+        cron: cron(1 1 1,8 * ? *)
+        input:
+          ContactGroupName: ${env:CONTACT_GROUP_NAME}
+          CountLimit: ${env:COUNT_LIMIT}
+          Period: ${env:PERIOD}
+          SpreadSheetID: ${env:SPREADSHEET_ID}
