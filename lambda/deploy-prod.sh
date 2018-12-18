@@ -14,5 +14,5 @@ export COUNT_LIMIT=${PROD_COUNT_LIMIT}
 export PERIOD=${PROD_PERIOD}
 export SPREADSHEET_ID=${PROD_SPREADSHEET_ID}
 
-echo "Deploying app-monitoring-archiver ..."
+echo "Deploying app-monitoring-archiver as archive-to-google-sheets ..."
 serverless deploy -v --stage prod
