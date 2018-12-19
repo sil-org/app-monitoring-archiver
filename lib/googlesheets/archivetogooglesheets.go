@@ -2,14 +2,13 @@ package googlesheets
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/sheets/v4"
 	"strings"
 	"github.com/silinternational/nodeping-cli/lib"
 	"time"
+	"golang.org/x/oauth2/jwt"
 )
 
 
@@ -177,20 +176,30 @@ func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (in
 	return chosenRow, err
 }
 
+
+func GetAuthConfig() *jwt.Config {
+
+	privateKey := GetRequiredEnvVar("GOOGLE_AUTH_PRIVATE_KEY")
+	privateKey = strings.Replace(privateKey, "\\n", "\n", -1)
+
+	config := &jwt.Config {
+		Email: GetRequiredEnvVar("GOOGLE_AUTH_CLIENT_EMAIL"),
+		PrivateKeyID: GetRequiredEnvVar("GOOGLE_AUTH_PRIVATE_KEY_ID"),
+		PrivateKey: []byte(privateKey),
+		TokenURL: GetRequiredEnvVar("GOOGLE_AUTH_TOKEN_URI"),
+		Scopes: []string{"https://www.googleapis.com/auth/spreadsheets"},
+	}
+
+	return config
+}
+
+
 func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingToken string, countLimit int) {
 	if countLimit < 1 {
 		countLimit = 1000
 	}
 
-	credBytes, err := ioutil.ReadFile(CredentialsForGoogle)
-	if err != nil {
-		log.Fatalf("Unable to read google credentials file: %v", err)
-	}
-
-	config, err := google.JWTConfigFromJSON(credBytes, "https://www.googleapis.com/auth/spreadsheets")
-	if err != nil {
-		log.Fatalf("Unable to parse google credentials file to config: %v", err)
-	}
+	config := GetAuthConfig()
 	client := config.Client(context.Background())
 
 	srv, err := sheets.New(client)
