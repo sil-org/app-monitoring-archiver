@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  digest = "1:5ad08b0e14866764a6d7475eb11c9cf05cad9a52c442593bdfa544703ff77f61"
-  name = "cloud.google.com/go"
-  packages = ["compute/metadata"]
-  pruneopts = "UT"
-  revision = "0ebda48a7f143b1cce9eb37a8c1106ac762a3430"
-  version = "v0.34.0"
-
-[[projects]]
   digest = "1:1c44f05197d518973df6d9371d4783035dd07ec1cb2049a6e799a59b2cc429b4"
   name = "github.com/aws/aws-lambda-go"
   packages = [
@@ -84,11 +76,10 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:23443edff0740e348959763085df98400dcfd85528d7771bb0ce9f5f2754ff4a"
+  digest = "1:ff3ccc9ed7248ea0bb85200e3ce690665789b8a9e780ecdad880d8d308619adb"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
-    "google",
     "internal",
     "jws",
     "jwt",
@@ -130,19 +121,16 @@
     "sheets/v4",
   ]
   pruneopts = "UT"
-  revision = "41dc4b66e69d5dbf20efe4ba67e19d214d147ae3"
+  revision = "146117f78c63efe78e04021cc321e59fb3c13e50"
 
 [[projects]]
-  digest = "1:d2a8db567a76203e3b41c1f632d86485ffd57f8e650a0d1b19d240671c2fddd7"
+  digest = "1:08206298775e5b462e6c0333f4471b44e63f1a70e42952b6ede4ecc9572281eb"
   name = "google.golang.org/appengine"
   packages = [
-    ".",
     "internal",
-    "internal/app_identity",
     "internal/base",
     "internal/datastore",
     "internal/log",
-    "internal/modules",
     "internal/remote_api",
     "internal/urlfetch",
     "urlfetch",
@@ -167,7 +155,7 @@
     "github.com/silinternational/nodeping-cli/lib",
     "github.com/spf13/cobra",
     "golang.org/x/net/context",
-    "golang.org/x/oauth2/google",
+    "golang.org/x/oauth2/jwt",
     "google.golang.org/api/sheets/v4",
   ]
   solver-name = "gps-cdcl"

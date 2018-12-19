@@ -6,6 +6,7 @@ import (
 	"google.golang.org/api/sheets/v4"
 	"golang.org/x/net/context"
 	"log"
+	"os"
 )
 
 func GetMonthPosition(monthLabel string) (int, error) {
@@ -147,4 +148,14 @@ func GetSheetIDFromTitle(title string, sheetsData SheetsData) (bool, int64, erro
 	}
 
 	return false, 0, nil
+}
+
+func GetRequiredEnvVar(envName string) string {
+	envVar := os.Getenv(envName)
+
+	if envVar == "" {
+		log.Fatalf("Error: Environment variable for %s is required \n", envName)
+	}
+
+	return envVar
 }

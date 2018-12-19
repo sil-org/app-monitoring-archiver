@@ -25,11 +25,18 @@ service account by following the instuctions at https://flaviocopes.com/google-a
 
  Note: There is a 100 writes per 100 seconds rate limit on Google Sheets.
 
-### Set environment variable
+### Set environment variables
 
 ```sh
 $ export NODEPING_TOKEN=EG123ABC
+$ export GOOGLE_AUTH_CLIENT_EMAIL=example@myaccount-123.iam.gserviceaccount.com
+$ export GOOGLE_AUTH_PRIVATE_KEY_ID=abc123
+$ export GOOGLE_AUTH_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIE...\n...\nabc=\n-----END PRIVATE KEY-----\n
+$ export GOOGLE_AUTH_TOKEN_URI=https://oauth2.googleapis.com/token
 ```
+Note that these GOOGLE_AUTH_* variable values can be found in the json that Google provides when
+creating a services account.  Also note that the Go code itself will convert "\n" to EOL in the
+GOOGLE_AUTH_PRIVATE_KEY value.
 
 ### Run from command line
 
@@ -39,4 +46,6 @@ $ go run main.go run -g "MyTeams Alerts" -s EG123ABC
 ```
 
 The SPREADSHEET_ID is the middle part of the url for the target Google Sheet when you just browse to it.
+
+
 
