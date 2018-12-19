@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - ./local.env
+    volumes:
+      - ./:/go/src/github.com/silinternational/app-monitoring-archiver
+    working_dir: /go/src/github.com/silinternational/app-monitoring-archiver
+    command: ["./run-debug.sh"]
