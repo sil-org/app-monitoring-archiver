@@ -38,6 +38,10 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  prod:
+    schedule: cron(20 2 2 * ? *)
+  dev:
+    schedule: cron(1 1 1,20 * ? *)
   namespace: ${self:service}_${self:custom.stage}
 
 
@@ -52,7 +56,7 @@ functions:
     handler: archive-to-google-sheets
     events:
     - schedule:
-        rate: cron(1 1 1,8 * ? *)
+        rate: ${self:custom.${self:custom.stage}.schedule}
         input:
           ContactGroupName: ${env:CONTACT_GROUP_NAME}
           CountLimit: ${env:COUNT_LIMIT}
