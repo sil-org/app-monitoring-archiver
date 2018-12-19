@@ -1,3 +1,5 @@
 auth.json
 *.env
 .idea/
+*.aes
+vendor

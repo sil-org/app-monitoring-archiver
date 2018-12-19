@@ -1,0 +1,16 @@
+{
+  "name": "app-monitoring-archiver",
+  "description": "Lambda function to grab NodePing results and write them to Google Sheets",
+  "dependencies": {
+    "aws-sdk": "^2.187.0"
+  },
+  "engines": {
+    "node": ">=6.5.0 <7.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/silinternational/app-monitoring-archiver"
+  },
+  "scripts": {}
+}
