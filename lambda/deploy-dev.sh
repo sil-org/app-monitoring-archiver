@@ -14,5 +14,10 @@ export COUNT_LIMIT=${DEV_COUNT_LIMIT}
 export PERIOD=${DEV_PERIOD}
 export SPREADSHEET_ID=${DEV_SPREADSHEET_ID}
 
+export GOOGLE_AUTH_CLIENT_EMAIL=${DEV_GOOGLE_AUTH_CLIENT_EMAIL}
+export GOOGLE_AUTH_PRIVATE_KEY_ID=${DEV_GOOGLE_AUTH_PRIVATE_KEY_ID}
+export GOOGLE_AUTH_PRIVATE_KEY=${DEV_GOOGLE_AUTH_PRIVATE_KEY}
+export GOOGLE_AUTH_TOKEN_URI=${DEV_GOOGLE_AUTH_TOKEN_URI}
+
 echo "Deploying app-monitoring-archiver as archive-to-google-sheets ..."
 serverless deploy -v --stage dev
