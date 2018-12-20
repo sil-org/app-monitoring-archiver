@@ -39,9 +39,9 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   prod:
-    schedule: cron(2 2 20 * ? *)
+    schedule: cron(50 13 21 * ? *)
   dev:
-    schedule: cron(1 1 1,20 * ? *)
+    schedule: cron(41 13 1,21 * ? *)
   namespace: ${self:service}_${self:custom.stage}
 
 
