@@ -6,6 +6,7 @@ import (
 	"os"
 	"log"
 	"github.com/silinternational/app-monitoring-archiver/cmd"
+	"strconv"
 )
 
 
@@ -13,7 +14,7 @@ type ArchiveToGoogleSheetsConfig struct {
 	ContactGroupName string
 	Period 			 string
 	SpreadSheetID 	 string
-	CountLimit 		 int
+	CountLimit 		 string
 }
 
 func main() {
@@ -31,12 +32,17 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 		log.Fatal("Error: Environment variable for NODEPING_TOKEN is required to execute plan and migration \n")
 	}
 
+	intCountLimit, err := strconv.Atoi(config.CountLimit)
+	if err != nil {
+		log.Fatalf("Error converting CountLimit of %s to integer. %v", config.CountLimit, err)
+	}
+
 	googlesheets.ArchiveResultsForMonth(
 		config.ContactGroupName,
 		config.Period,
 		config.SpreadSheetID,
 		nodepingToken,
-		config.CountLimit,
+		intCountLimit,
 	)
 	return nil
 }
