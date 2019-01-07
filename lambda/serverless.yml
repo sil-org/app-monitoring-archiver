@@ -39,7 +39,7 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   prod:
-    schedule: cron(30 19 7,20 * ? *)
+    schedule: cron(10 20 7,20 * ? *)
   dev:
     schedule: cron(40 14 1,20 * ? *)
   namespace: ${self:service}_${self:custom.stage}
