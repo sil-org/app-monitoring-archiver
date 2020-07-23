@@ -2,10 +2,10 @@
   "name": "app-monitoring-archiver",
   "description": "Lambda function to grab NodePing results and write them to Google Sheets",
   "dependencies": {
-    "aws-sdk": "^2.187.0"
+    "aws-sdk": "^2.711.0"
   },
   "engines": {
-    "node": ">=6.5.0 <7.0.0"
+    "node": ">=14.0.0 <15.0.0"
   },
   "license": "MIT",
   "repository": {

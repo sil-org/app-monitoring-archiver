@@ -1,13 +1,14 @@
 FROM golang:latest
 
 # Install packages
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y git nodejs
-RUN go get -u github.com/golang/dep/cmd/dep
 
 # Copy in source and install deps
-RUN mkdir -p /go/src/github.com/silinternational/app-monitoring-archiver
+WORKDIR /app-monitoring-archiver
+ADD . .
 RUN npm install -g serverless && npm install
-COPY ./ /go/src/github.com/silinternational/app-monitoring-archiver/
-WORKDIR /go/src/github.com/silinternational/app-monitoring-archiver/lambda
-RUN dep ensure
+
+WORKDIR /app-monitoring-archiver/lambda
+RUN go get ./..
+
