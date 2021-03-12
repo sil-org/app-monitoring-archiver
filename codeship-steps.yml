@@ -1,8 +1,3 @@
-- name: deploy_dev
-  service: app
-  tag: develop
-  command: ./deploy-dev.sh
-
 - name: deploy_prod
   service: app
   tag: master
