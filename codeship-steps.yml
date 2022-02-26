@@ -5,5 +5,5 @@
 
 - name: track_deployment
   service: tracker
-  tag: ^(master|develop)
+  tag: ^(master|main)
   command: "true"
