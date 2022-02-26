@@ -1,37 +1,38 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"log"
+
+	"github.com/spf13/cobra"
+
 	"github.com/silinternational/app-monitoring-archiver/lib/googlesheets"
 )
 
-
-var contactGroupName string
-var spreadsheetID string
-var countLimit int
+var (
+	contactGroupName string
+	spreadsheetID    string
+	countLimit       int
+)
 
 var runCmd = &cobra.Command{
-	Use: "run",
+	Use:   "run",
 	Short: "Archive Nodeping results",
-	Long: "Get the uptime results from Nodeping and write them to Google Sheets.",
+	Long:  "Get the uptime results from Nodeping and write them to Google Sheets.",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if contactGroupName == "" {
-			log.Fatal(`Error: The 'contact-group' flag is required (e.g. -g "AppsDev Alerts"). \n`)
+			log.Fatal(`Error: The 'contact-group' flag is required (e.g. -g "AppsDev Alerts").`)
 		}
 
 		if spreadsheetID == "" {
-			log.Fatal(`Error: The 'spreadsheetID' flag is required (found in its url). \n`)
+			log.Fatal(`Error: The 'spreadsheetID' flag is required (found in its url).`)
 		}
 
 		runArchive()
 	},
 }
 
-
 func init() {
-
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringVarP(
 		&contactGroupName,

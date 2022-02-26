@@ -3,22 +3,21 @@ package googlesheets
 import (
 	"fmt"
 	"log"
-	"golang.org/x/net/context"
-	"google.golang.org/api/sheets/v4"
 	"strings"
-	"github.com/silinternational/nodeping-cli/lib"
 	"time"
+
+	"github.com/silinternational/nodeping-cli/lib"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2/jwt"
+	"google.golang.org/api/sheets/v4"
 )
 
-
-const CredentialsForGoogle = `./lib/googlesheets/auth.json`
 const MonthHeaderRow = 2
 
 type SheetsData struct {
 	SpreadsheetID string // The ID of the whole Google Sheets file
-	SheetID int64  // The index of the individual sheet
-	Service *sheets.Service
+	SheetID       int64  // The index of the individual sheet
+	Service       *sheets.Service
 }
 
 func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
@@ -56,16 +55,14 @@ func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
 		return 0, fmt.Errorf("Error finding newly created sheet %s. %v", sheetName, err)
 	}
 
-	if ! doesSheetExist {
+	if !doesSheetExist {
 		return 0, fmt.Errorf("Unable to find newly created sheet %s.", sheetName)
 	}
 
 	return sheetID, nil
 }
 
-
 func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, error) {
-
 	desiredMonthPosition, err := GetMonthPosition(month)
 	monthHeader := fmt.Sprintf("%s %s", month, year)
 
@@ -119,7 +116,6 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 	return chosenColumn, err
 }
 
-
 func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (int, error) {
 	checksRange := fmt.Sprintf("%s!A3:A100", year)
 	srv := sheetsData.Service
@@ -130,7 +126,6 @@ func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (in
 	if err != nil {
 		return 0, fmt.Errorf("Error getting Nodeping Check names for %s: %s", nodepingCheck, err)
 	}
-
 
 	indexOfFirstCheck := 3
 
@@ -156,13 +151,13 @@ func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (in
 		rowCheckName := fmt.Sprintf("%v", value[0])
 
 		if npCheckLower < strings.ToLower(rowCheckName) {
-			chosenRow = index + indexOfFirstCheck - 1  // It must be doing an "insert below"
+			chosenRow = index + indexOfFirstCheck - 1 // It must be doing an "insert below"
 			InsertRow(int64(chosenRow), sheetID, spreadsheetID, srv)
 			chosenRow += 1
 			err := WriteToCellWithColumnLetter(int64(chosenRow), "A", nodepingCheck, year, spreadsheetID, srv)
 			return chosenRow, err
 		} else if npCheckLower == strings.ToLower(rowCheckName) {
-			chosenRow = index +indexOfFirstCheck
+			chosenRow = index + indexOfFirstCheck
 			return chosenRow, nil
 		}
 	}
@@ -176,23 +171,20 @@ func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (in
 	return chosenRow, err
 }
 
-
 func GetAuthConfig() *jwt.Config {
-
 	privateKey := GetRequiredEnvVar("GOOGLE_AUTH_PRIVATE_KEY")
 	privateKey = strings.Replace(privateKey, "\\n", "\n", -1)
 
-	config := &jwt.Config {
-		Email: GetRequiredEnvVar("GOOGLE_AUTH_CLIENT_EMAIL"),
+	config := &jwt.Config{
+		Email:        GetRequiredEnvVar("GOOGLE_AUTH_CLIENT_EMAIL"),
 		PrivateKeyID: GetRequiredEnvVar("GOOGLE_AUTH_PRIVATE_KEY_ID"),
-		PrivateKey: []byte(privateKey),
-		TokenURL: GetRequiredEnvVar("GOOGLE_AUTH_TOKEN_URI"),
-		Scopes: []string{"https://www.googleapis.com/auth/spreadsheets"},
+		PrivateKey:   []byte(privateKey),
+		TokenURL:     GetRequiredEnvVar("GOOGLE_AUTH_TOKEN_URI"),
+		Scopes:       []string{"https://www.googleapis.com/auth/spreadsheets"},
 	}
 
 	return config
 }
-
 
 func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingToken string, countLimit int) {
 	if countLimit < 1 {
@@ -213,15 +205,14 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 	}
 
 	// Get the human readable form of the month and year
-	monthTime := uptimeResults.StartTime + 86400  // Add seconds per day to ensure time zone issues don't point to previous month
+	monthTime := uptimeResults.StartTime + 86400 // Add seconds per day to ensure time zone issues don't point to previous month
 	month := time.Unix(monthTime, 0).Format("January")
 	year := time.Unix(monthTime, 0).Format("2006")
 
 	sheetsData := SheetsData{
 		SpreadsheetID: spreadsheetID,
-		Service: srv,
+		Service:       srv,
 	}
-
 
 	sheetID, err := EnsureSheetExists(year, sheetsData)
 	if err != nil {
@@ -244,7 +235,7 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 		}
 
 		// The quota is 100 writes per 100 seconds per user
-		if index % 20 == 0 {
+		if index%20 == 0 {
 			fmt.Printf("Waiting %v seconds at index %d to avoid Google Api rate limiting.\n", delaySeconds.Seconds(), index)
 			time.Sleep(time.Second * delaySeconds)
 		}

@@ -1,20 +1,21 @@
 package main
 
 import (
-	"github.com/silinternational/app-monitoring-archiver/lib/googlesheets"
-	"github.com/aws/aws-lambda-go/lambda"
-	"os"
 	"log"
-	"github.com/silinternational/app-monitoring-archiver/cmd"
+	"os"
 	"strconv"
-)
 
+	"github.com/aws/aws-lambda-go/lambda"
+
+	"github.com/silinternational/app-monitoring-archiver/cmd"
+	"github.com/silinternational/app-monitoring-archiver/lib/googlesheets"
+)
 
 type ArchiveToGoogleSheetsConfig struct {
 	ContactGroupName string
-	Period 			 string
-	SpreadSheetID 	 string
-	CountLimit 		 string
+	Period           string
+	SpreadSheetID    string
+	CountLimit       string
 }
 
 func main() {
@@ -29,7 +30,7 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 	nodepingToken := os.Getenv(cmd.NodepingTokenKey)
 
 	if nodepingToken == "" {
-		log.Fatal("Error: Environment variable for NODEPING_TOKEN is required to execute plan and migration \n")
+		log.Fatal("Error: Environment variable for NODEPING_TOKEN is required to execute plan and migration")
 	}
 
 	intCountLimit, err := strconv.Atoi(config.CountLimit)
