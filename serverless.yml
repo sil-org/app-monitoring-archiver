@@ -29,7 +29,7 @@ custom:
 package:
   patterns:
   - '!./**'
-  - './lambda'
+  - './bin/lambda'
 
 functions:
   archiveToGoogleSheets:
