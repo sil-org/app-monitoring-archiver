@@ -38,4 +38,4 @@ else
 fi
 
 echo "Deploying app-monitoring-archiver as lambda (stage=$1)..."
-serverless deploy --verbose --stage "$1"
+$HOME/.serverless/bin/serverless deploy --verbose --stage "$1"
