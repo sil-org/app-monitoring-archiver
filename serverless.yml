@@ -1,4 +1,4 @@
-service: archive-to-google-sheets
+service: app-monitoring-archiver
 
 frameworkVersion: ^3.2.0
 

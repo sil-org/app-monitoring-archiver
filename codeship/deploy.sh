@@ -3,8 +3,6 @@
 # Exit if any command below fails
 set -e
 
-set -x
-
 # Build binaries
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 $DIR/build.sh
