@@ -1,12 +1,13 @@
 package googlesheets
 
 import (
-	"strings"
 	"fmt"
-	"google.golang.org/api/sheets/v4"
-	"golang.org/x/net/context"
 	"log"
 	"os"
+	"strings"
+
+	"golang.org/x/net/context"
+	"google.golang.org/api/sheets/v4"
 )
 
 func GetMonthPosition(monthLabel string) (int, error) {
@@ -15,22 +16,22 @@ func GetMonthPosition(monthLabel string) (int, error) {
 	month := strings.ToLower(monthParts[0])
 
 	indexes := map[string]int{
-		"january": 1,
-		"february": 2,
-		"march": 3,
-		"april": 4,
-		"may": 5,
-		"june": 6,
-		"july": 7,
-		"august": 8,
+		"january":   1,
+		"february":  2,
+		"march":     3,
+		"april":     4,
+		"may":       5,
+		"june":      6,
+		"july":      7,
+		"august":    8,
 		"september": 9,
-		"october": 10,
-		"november": 11,
-		"december": 12,
+		"october":   10,
+		"november":  11,
+		"december":  12,
 	}
 
 	index, ok := indexes[month]
-	if ! ok {
+	if !ok {
 		return 0, fmt.Errorf("Month %s not valid", monthLabel)
 	}
 
@@ -38,16 +39,14 @@ func GetMonthPosition(monthLabel string) (int, error) {
 }
 
 func ConvertColumnIndexToLetter(index int64) (string, error) {
-
 	if index > 25 {
 		return "", fmt.Errorf("Not allowed to convert index if over 25. It was %d", index)
 	}
 
 	runeA := int64([]rune("A")[0])
 
-	return fmt.Sprintf("%c", index + runeA), nil
+	return fmt.Sprintf("%c", index+runeA), nil
 }
-
 
 func WriteToCellWithColumnLetter(rowIndex int64, columnLetter, newValue, sheetName, spreadsheetID string, srv *sheets.Service) error {
 	cellRange := fmt.Sprintf("%s!%s%d", sheetName, columnLetter, rowIndex)
@@ -64,7 +63,6 @@ func WriteToCellWithColumnLetter(rowIndex int64, columnLetter, newValue, sheetNa
 	return nil
 }
 
-
 func WriteToCellWithColumnIndex(rowIndex, columnIndex int64, newValue, sheetName, spreadsheetID string, srv *sheets.Service) error {
 	columnLetter, err := ConvertColumnIndexToLetter(columnIndex)
 	if err != nil {
@@ -73,7 +71,6 @@ func WriteToCellWithColumnIndex(rowIndex, columnIndex int64, newValue, sheetName
 	return WriteToCellWithColumnLetter(rowIndex, columnLetter, newValue, sheetName, spreadsheetID, srv)
 }
 
-
 func InsertRowOrColumn(insertRowNotColumn bool, index, sheetID int64, spreadsheetID string, srv *sheets.Service) error {
 	dimension := "COLUMNS"
 	if insertRowNotColumn {
@@ -81,12 +78,12 @@ func InsertRowOrColumn(insertRowNotColumn bool, index, sheetID int64, spreadshee
 	}
 
 	request := sheets.Request{
-		InsertDimension: &sheets.InsertDimensionRequest {
-			Range: &sheets.DimensionRange {
-				SheetId: sheetID,
-				Dimension: dimension,
+		InsertDimension: &sheets.InsertDimensionRequest{
+			Range: &sheets.DimensionRange{
+				SheetId:    sheetID,
+				Dimension:  dimension,
 				StartIndex: index,
-				EndIndex: index+1,
+				EndIndex:   index + 1,
 			},
 			InheritFromBefore: true,
 		},
@@ -103,24 +100,20 @@ func InsertRowOrColumn(insertRowNotColumn bool, index, sheetID int64, spreadshee
 	return nil
 }
 
-
 func InsertColumn(index, sheetID int64, spreadsheetID string, srv *sheets.Service) error {
 	return InsertRowOrColumn(false, index, sheetID, spreadsheetID, srv)
 }
-
 
 func InsertRow(index, sheetID int64, spreadsheetID string, srv *sheets.Service) error {
 	return InsertRowOrColumn(true, index, sheetID, spreadsheetID, srv)
 }
 
-
-
 func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) {
 	request := sheets.Request{
-		AppendDimension: &sheets.AppendDimensionRequest {
+		AppendDimension: &sheets.AppendDimensionRequest{
 			Dimension: "COLUMNS",
-			Length: 1,
-			SheetId: sheetID,
+			Length:    1,
+			SheetId:   sheetID,
 		},
 	}
 
@@ -129,14 +122,12 @@ func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) {
 	}
 	_, err := srv.Spreadsheets.BatchUpdate(spreadsheetID, rbb).Context(context.Background()).Do()
 	if err != nil {
-		log.Fatalf("Unable to add column to sheet %d. %s", sheetID,  err)
+		log.Fatalf("Unable to add column to sheet %d. %s", sheetID, err)
 	}
 }
 
-
 func GetSheetIDFromTitle(title string, sheetsData SheetsData) (bool, int64, error) {
 	ssResp, err := sheetsData.Service.Spreadsheets.Get(sheetsData.SpreadsheetID).Do()
-
 	if err != nil {
 		return false, 0, fmt.Errorf("Error trying to find sheet %s. %v", title, err)
 	}
@@ -154,7 +145,7 @@ func GetRequiredEnvVar(envName string) string {
 	envVar := os.Getenv(envName)
 
 	if envVar == "" {
-		log.Fatalf("Error: Environment variable for %s is required \n", envName)
+		log.Fatalf("Error: Environment variable for %s is required", envName)
 	}
 
 	return envVar

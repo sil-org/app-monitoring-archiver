@@ -1,9 +1,9 @@
 - name: deploy_prod
   service: app
-  tag: master
-  command: ./deploy-prod.sh
+  tag: ^(master|main)
+  command: ./codeship/deploy.sh prod
 
 - name: track_deployment
   service: tracker
-  tag: ^(master|develop)
+  tag: ^(master|main)
   command: "true"

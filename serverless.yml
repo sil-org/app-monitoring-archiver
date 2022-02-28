@@ -1,11 +1,6 @@
-# For full config options, check the docs:
-#    docs.serverless.com
-
 service: archive-to-google-sheets
 
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
+frameworkVersion: ^3.2.0
 
 provider:
   name: aws
@@ -14,20 +9,8 @@ provider:
   versionFunctions: false
   memorySize: 128
   logRetentionInDays: 14
-  # you can overwrite defaults here
-  #  stage: dev
-  #  region: us-east-1
 
-  # you can add statements to the Lambda function's IAM Role here
-  # iamRoleStatements:
-  # - Effect: "Allow"
-  #   Action:
-  #     - "ecs:ListServices"
-  #   Resource: "*"
-
-  # you can define service wide environment variables here
   environment:
-    stage: ${self:custom.stage}
     namespace: ${self:custom.namespace}
     NODEPING_TOKEN: ${env:NODEPING_TOKEN}
     GOOGLE_AUTH_CLIENT_EMAIL: ${env:GOOGLE_AUTH_CLIENT_EMAIL}
@@ -35,29 +18,25 @@ provider:
     GOOGLE_AUTH_PRIVATE_KEY: ${env:GOOGLE_AUTH_PRIVATE_KEY}
     GOOGLE_AUTH_TOKEN_URI: ${env:GOOGLE_AUTH_TOKEN_URI}
 
-
 custom:
-  stage: ${opt:stage, self:provider.stage}
   prod:
     # cron(Minutes Hours Day-of-month Month Day-of-week Year)
     schedule: cron(30 3 1 * ? *)
   dev:
     schedule: cron(40 14 1,20 * ? *)
-  namespace: ${self:service}_${self:custom.stage}
-
+  namespace: ${self:service}_${sls:stage}
 
 package:
-  exclude:
-  - ./**
-  include:
-  - ./archive-to-google-sheets
+  patterns:
+  - '!./**'
+  - './lambda'
 
 functions:
   archiveToGoogleSheets:
-    handler: archive-to-google-sheets
+    handler: lambda
     events:
     - schedule:
-        rate: ${self:custom.${self:custom.stage}.schedule}
+        rate: ${self:custom.${sls:stage}.schedule}
         input:
           ContactGroupName: ${env:CONTACT_GROUP_NAME}
           CountLimit: ${env:COUNT_LIMIT}
