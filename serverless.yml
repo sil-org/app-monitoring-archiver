@@ -33,7 +33,7 @@ package:
 
 functions:
   archiveToGoogleSheets:
-    handler: lambda
+    handler: bin/lambda
     events:
     - schedule:
         rate: ${self:custom.${sls:stage}.schedule}
