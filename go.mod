@@ -20,8 +20,8 @@ require (
 	github.com/silinternational/nodeping-go-client v0.0.0-20190618205520-2203b33a9e99 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opencensus.io v0.22.4 // indirect
-	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	golang.org/x/text v0.3.8 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/genproto v0.0.0-20200707001353-8e8330bf89df // indirect
 	google.golang.org/grpc v1.30.0 // indirect
