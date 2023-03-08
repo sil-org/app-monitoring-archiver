@@ -52,7 +52,7 @@ func WriteToCellWithColumnLetter(rowIndex int64, columnLetter, newValue, sheetNa
 	cellRange := fmt.Sprintf("%s!%s%d", sheetName, columnLetter, rowIndex)
 	valueRange := &sheets.ValueRange{}
 
-	updateValue := []interface{}{newValue}
+	updateValue := []any{newValue}
 	valueRange.Values = append(valueRange.Values, updateValue)
 
 	_, err := srv.Spreadsheets.Values.Update(spreadsheetID, cellRange, valueRange).ValueInputOption("RAW").Do()
