@@ -3,11 +3,6 @@
   tag: main
   command: ./codeship/deploy.sh prod
 
-- name: track_deployment
-  service: tracker
-  tag: main
-  command: "true"
-
 - name: ga4track_deployment
   service: ga4tracker
   tag: ^(main|develop)
