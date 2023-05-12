@@ -5,7 +5,7 @@ set -e
 
 # Build binaries
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-$DIR/build.sh
+"$DIR"/build.sh
 
 # Export env vars
 if [ "$1" = "prod" ]; then
