@@ -46,6 +46,3 @@ $ go run main.go run -g "MyTeams Alerts" -s EG123ABC
 ```
 
 The SPREADSHEET_ID is the middle part of the url for the target Google Sheet when you just browse to it.
-
-
-
