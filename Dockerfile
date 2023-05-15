@@ -1,4 +1,4 @@
-FROM golang:1.17
+FROM golang:1.20
 
 RUN curl -o- -L https://slss.io/install | VERSION=3.3.0 bash
 
