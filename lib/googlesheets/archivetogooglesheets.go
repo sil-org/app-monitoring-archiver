@@ -116,6 +116,43 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 	return chosenColumn, err
 }
 
+// This returns a row number (0-indexed) and a boolean as to whether a row needs to be inserted.
+//  It begins by converting the first column of the rows to string values.
+//  If there are no cells in that column, it just returns (0, false).
+//  If it comes to a cell that is empty or matches the checkName value, it returns the
+//    corresponding row number and false.
+//  If it comes to a cell that has a value greater (alphabetically) than the checkName, it
+//    returns the corresponding row number and true (i.e. a row needs to be inserted)
+func findRowPositionAndWhetherToInsertARow(checkName string, rows [][]interface{}) (int, bool) {
+	if len(rows) == 0 || len(rows[0]) == 0 {
+		return 0, false
+	}
+	checkName = strings.ToLower(checkName)
+
+	// first, just get the string values in the first column of the range
+	values := []string{}
+	for _, cells := range rows {
+		// This should never happen, but let's just be extra careful
+		if len(cells) == 0 {
+			break
+		}
+
+		value := strings.ToLower(fmt.Sprintf("%v", cells[0]))
+		values = append(values, value)
+	}
+
+	for i, value := range values {
+		if value == "" || value == checkName {
+			return i, false
+		}
+		if value > checkName {
+			return i, true
+		}
+	}
+
+	return len(values), false
+}
+
 // EnsureCheckRowExists looks for a match for the check name in the Sheet's A column (starting at row 3)
 // If it finds a match or a blank cell, it returns that row number.  Otherwise, it looks down the column
 // until it finds an existing check name that comes after it in terms of alphabetical order.
@@ -132,49 +169,13 @@ func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (in
 		return 0, fmt.Errorf("Error getting Nodeping Check names for %s: %s", nodepingCheck, err)
 	}
 
-	indexOfFirstCheck := 3
+	const indexOfFirstCheck = 3
+	rowInRange, insertRow := findRowPositionAndWhetherToInsertARow(nodepingCheck, resp.Values)
+	chosenRow := rowInRange + indexOfFirstCheck
 
-	npCheckLower := strings.ToLower(nodepingCheck)
-
-	chosenRow := 0
-	for index, cells := range resp.Values {
-
-		// There should always be a result for a cell, even if it's empty,
-		// But, just to be careful, if it does happen, then use that row for this Check name
-		if len(cells) < 1 {
-			chosenRow = index + indexOfFirstCheck
-			break
-		}
-
-		rowCheckName := fmt.Sprintf("%v", cells[0])
-
-		// If the cell is blank, then use that row for this Check name
-		if rowCheckName == "" {
-			chosenRow = index + indexOfFirstCheck
-			break
-		}
-
-		// If the new Check name comes before (alphabetically, case-insensitive) than
-		// the existing Check name in the current row, then
-		// insert a row and use the newly inserted row
-		if npCheckLower < strings.ToLower(rowCheckName) {
-			chosenRow = index + indexOfFirstCheck - 1 // It must be doing an "insert below"
-			InsertRow(int64(chosenRow), sheetID, spreadsheetID, srv)
-			chosenRow += 1 // Reverse the -1 from two code lines up
-			break
-
-			// If the new Check name matches the existing check name in the current row (case-insensitive)
-			// then use the current row
-		} else if npCheckLower == strings.ToLower(rowCheckName) {
-			chosenRow = index + indexOfFirstCheck
-			return chosenRow, nil
-		}
-	}
-
-	// Just to be careful, if somehow there weren't any results returned for the range, then
-	// use the first row of the range.
-	if chosenRow == 0 {
-		chosenRow = indexOfFirstCheck
+	if insertRow {
+		row := chosenRow - 1 // It must be doing an "insert below"
+		InsertRow(int64(row), sheetID, spreadsheetID, srv)
 	}
 
 	err = WriteToCellWithColumnLetter(int64(chosenRow), "A", nodepingCheck, year, spreadsheetID, srv)
