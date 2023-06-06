@@ -10,7 +10,7 @@ func Test_findRowPositionAndWhetherToInsertARow(t *testing.T) {
 
 	type testCase struct {
 		name          string
-		values        [][]interface{}
+		values        [][]any
 		checkName     string
 		wantRow       int
 		wantInsertRow bool
@@ -19,30 +19,30 @@ func Test_findRowPositionAndWhetherToInsertARow(t *testing.T) {
 	testCases := []testCase{
 		{
 			name:          "all empty",
-			values:        [][]interface{}{},
+			values:        [][]any{},
 			checkName:     "Anything",
 			wantRow:       0,
 			wantInsertRow: false,
 		},
 		{
 			name:          "empty row",
-			values:        [][]interface{}{[]interface{}{}},
+			values:        [][]any{{}},
 			checkName:     "Anything",
 			wantRow:       0,
 			wantInsertRow: false,
 		},
 		{
 			name:          "blank first cell",
-			values:        [][]interface{}{[]interface{}{""}},
+			values:        [][]any{{""}},
 			checkName:     "Anything",
 			wantRow:       0,
 			wantInsertRow: false,
 		},
 		{
 			name: "new checkName comes before first",
-			values: [][]interface{}{
-				[]interface{}{"Second"},
-				[]interface{}{"Third"},
+			values: [][]any{
+				{"Second"},
+				{"Third"},
 			},
 			checkName:     "first",
 			wantRow:       0,
@@ -50,9 +50,9 @@ func Test_findRowPositionAndWhetherToInsertARow(t *testing.T) {
 		},
 		{
 			name: "new checkName is the same as first",
-			values: [][]interface{}{
-				[]interface{}{"First"},
-				[]interface{}{"Second"},
+			values: [][]any{
+				{"First"},
+				{"Second"},
 			},
 			checkName:     "first",
 			wantRow:       0,
@@ -60,9 +60,9 @@ func Test_findRowPositionAndWhetherToInsertARow(t *testing.T) {
 		},
 		{
 			name: "new checkName comes before second",
-			values: [][]interface{}{
-				[]interface{}{"First"},
-				[]interface{}{"Third"},
+			values: [][]any{
+				{"First"},
+				{"Third"},
 			},
 			checkName:     "second",
 			wantRow:       1,
@@ -70,9 +70,9 @@ func Test_findRowPositionAndWhetherToInsertARow(t *testing.T) {
 		},
 		{
 			name: "new checkName is the same as second",
-			values: [][]interface{}{
-				[]interface{}{"first"},
-				[]interface{}{"second"},
+			values: [][]any{
+				{"first"},
+				{"second"},
 			},
 			checkName:     "Second",
 			wantRow:       1,
@@ -80,9 +80,9 @@ func Test_findRowPositionAndWhetherToInsertARow(t *testing.T) {
 		},
 		{
 			name: "new checkName comes after others",
-			values: [][]interface{}{
-				[]interface{}{"first"},
-				[]interface{}{"second"},
+			values: [][]interface{}{ // testing once with [][]interface{}, since that is what the Google library uses
+				{"first"},
+				{"second"},
 			},
 			checkName:     "Third",
 			wantRow:       2,

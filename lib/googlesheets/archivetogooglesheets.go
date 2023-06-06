@@ -123,34 +123,31 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 //    corresponding row number and false.
 //  If it comes to a cell that has a value greater (alphabetically) than the checkName, it
 //    returns the corresponding row number and true (i.e. a row needs to be inserted)
-func findRowPositionAndWhetherToInsertARow(checkName string, rows [][]interface{}) (int, bool) {
+func findRowPositionAndWhetherToInsertARow(checkName string, rows [][]any) (int, bool) {
 	if len(rows) == 0 || len(rows[0]) == 0 {
 		return 0, false
 	}
 	checkName = strings.ToLower(checkName)
 
-	// first, just get the string values in the first column of the range
-	values := []string{}
-	for _, cells := range rows {
+	rowCount := 0
+
+	for i, cells := range rows {
 		// This should never happen, but let's just be extra careful
 		if len(cells) == 0 {
-			break
+			return i, false
 		}
 
 		value := strings.ToLower(fmt.Sprintf("%v", cells[0]))
-		values = append(values, value)
-	}
-
-	for i, value := range values {
 		if value == "" || value == checkName {
 			return i, false
 		}
 		if value > checkName {
 			return i, true
 		}
+		rowCount++
 	}
 
-	return len(values), false
+	return rowCount, false
 }
 
 // EnsureCheckRowExists looks for a match for the check name in the Sheet's A column (starting at row 3)
@@ -158,7 +155,7 @@ func findRowPositionAndWhetherToInsertARow(checkName string, rows [][]interface{
 // until it finds an existing check name that comes after it in terms of alphabetical order.
 // Once it finds such an existing check name, it inserts a row above the existing row and then
 // inserts the new check name into the first cell of the inserted row.
-func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (int, error) {
+func EnsureCheckRowExists(nodePingCheck, year string, sheetsData SheetsData) (int, error) {
 	checksRange := fmt.Sprintf("%s!A3:A100", year)
 	srv := sheetsData.Service
 	spreadsheetID := sheetsData.SpreadsheetID
@@ -166,11 +163,11 @@ func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (in
 
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, checksRange).Do()
 	if err != nil {
-		return 0, fmt.Errorf("Error getting Nodeping Check names for %s: %s", nodepingCheck, err)
+		return 0, fmt.Errorf("Error getting NodePing Check names for %s: %s", nodePingCheck, err)
 	}
 
 	const indexOfFirstCheck = 3
-	rowInRange, insertRow := findRowPositionAndWhetherToInsertARow(nodepingCheck, resp.Values)
+	rowInRange, insertRow := findRowPositionAndWhetherToInsertARow(nodePingCheck, resp.Values)
 	chosenRow := rowInRange + indexOfFirstCheck
 
 	if insertRow {
@@ -178,7 +175,7 @@ func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (in
 		InsertRow(int64(row), sheetID, spreadsheetID, srv)
 	}
 
-	err = WriteToCellWithColumnLetter(int64(chosenRow), "A", nodepingCheck, year, spreadsheetID, srv)
+	err = WriteToCellWithColumnLetter(int64(chosenRow), "A", nodePingCheck, year, spreadsheetID, srv)
 	return chosenRow, err
 }
 
@@ -212,7 +209,7 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 
 	uptimeResults, err := lib.GetUptimesForContactGroup(nodePingToken, contactGroupName, period)
 	if err != nil {
-		log.Fatalf("Error getting Nodeping results.  %v", err)
+		log.Fatalf("Error getting NodePing results.  %v", err)
 	}
 
 	// Get the human readable form of the month and year
@@ -240,7 +237,7 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 	index := 1
 	delaySeconds := time.Duration(22)
 
-	for nodepingCheck, percentage := range uptimeResults.Uptimes {
+	for nodePingCheck, percentage := range uptimeResults.Uptimes {
 		if index > countLimit {
 			break
 		}
@@ -251,9 +248,9 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 			time.Sleep(time.Second * delaySeconds)
 		}
 
-		checkRow, err := EnsureCheckRowExists(nodepingCheck, year, sheetsData)
+		checkRow, err := EnsureCheckRowExists(nodePingCheck, year, sheetsData)
 		if err != nil {
-			log.Fatalf("Error adding row for %s", nodepingCheck)
+			log.Fatalf("Error adding row for %s", nodePingCheck)
 		}
 
 		err = WriteToCellWithColumnIndex(
