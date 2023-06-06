@@ -52,7 +52,7 @@ func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
 
 	doesSheetExist, sheetID, err = GetSheetIDFromTitle(sheetName, sheetsData)
 	if err != nil {
-		return 0, fmt.Errorf("Error finding newly created sheet %s. %v", sheetName, err)
+		return 0, fmt.Errorf("error finding newly created sheet %s. %v", sheetName, err)
 	}
 
 	if !doesSheetExist {
@@ -73,7 +73,7 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, monthsRange).Do()
 	if err != nil {
-		return 0, fmt.Errorf("Error getting month headings for %s: %s", monthsRange, err)
+		return 0, fmt.Errorf("error getting month headings for %s: %s", monthsRange, err)
 	}
 
 	indexOfFirstMonth := 1
@@ -116,58 +116,68 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 	return chosenColumn, err
 }
 
-func EnsureCheckRowExists(nodepingCheck, year string, sheetsData SheetsData) (int, error) {
-	checksRange := fmt.Sprintf("%s!A3:A100", year)
+// This returns a row number (0-indexed) and a boolean as to whether a row needs to be inserted.
+//  It begins by converting the first column of the rows to string values.
+//  If there are no cells in that column, it just returns (0, false).
+//  If it comes to a cell that is empty or matches the checkName value, it returns the
+//    corresponding row number and false.
+//  If it comes to a cell that has a value greater (alphabetically) than the checkName, it
+//    returns the corresponding row number and true (i.e. a row needs to be inserted)
+func findRowPositionAndWhetherToInsertARow(checkName string, rows [][]any) (int, bool) {
+	if len(rows) == 0 || len(rows[0]) == 0 {
+		return 0, false
+	}
+	checkName = strings.ToLower(checkName)
+
+	rowCount := 0
+
+	for i, cells := range rows {
+		// This should never happen, but let's just be extra careful
+		if len(cells) == 0 {
+			return i, false
+		}
+
+		value := strings.ToLower(fmt.Sprintf("%v", cells[0]))
+		if value == "" || value == checkName {
+			return i, false
+		}
+		if value > checkName {
+			return i, true
+		}
+		rowCount++
+	}
+
+	return rowCount, false
+}
+
+// EnsureCheckRowExists looks for a match for the check name in the Sheet's A column (starting at row 3)
+// If it finds a match or a blank cell, it returns that row number.  Otherwise, it looks down the column
+// until it finds an existing check name that comes after it in terms of alphabetical order.
+// Once it finds such an existing check name, it inserts a row above the existing row and then
+// inserts the new check name into the first cell of the inserted row.
+func EnsureCheckRowExists(nodePingCheck, year string, sheetsData SheetsData) (int, error) {
+	const indexOfFirstCheck = 3
+	checksRange := fmt.Sprintf("%s!A%d:A100", year, indexOfFirstCheck)
 	srv := sheetsData.Service
 	spreadsheetID := sheetsData.SpreadsheetID
 	sheetID := sheetsData.SheetID
 
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, checksRange).Do()
 	if err != nil {
-		return 0, fmt.Errorf("Error getting Nodeping Check names for %s: %s", nodepingCheck, err)
+		return 0, fmt.Errorf("error getting NodePing Check names for %s: %s", nodePingCheck, err)
 	}
 
-	indexOfFirstCheck := 3
+	rowInRange, insertRow := findRowPositionAndWhetherToInsertARow(nodePingCheck, resp.Values)
+	chosenRow := rowInRange + indexOfFirstCheck
 
-	// No Check Heading in first row, so just use that row
-	if len(resp.Values) < 1 {
-		err = WriteToCellWithColumnLetter(int64(indexOfFirstCheck), "A", nodepingCheck, year, spreadsheetID, srv)
-		return indexOfFirstCheck, err
-	}
-
-	npCheckLower := strings.ToLower(nodepingCheck)
-
-	chosenRow := 0
-	lastIndex := 0
-
-	for index, value := range resp.Values {
-		lastIndex = index
-
-		if len(value) < 1 {
-			chosenRow = index + indexOfFirstCheck
-			break
-		}
-
-		rowCheckName := fmt.Sprintf("%v", value[0])
-
-		if npCheckLower < strings.ToLower(rowCheckName) {
-			chosenRow = index + indexOfFirstCheck - 1 // It must be doing an "insert below"
-			InsertRow(int64(chosenRow), sheetID, spreadsheetID, srv)
-			chosenRow += 1
-			err := WriteToCellWithColumnLetter(int64(chosenRow), "A", nodepingCheck, year, spreadsheetID, srv)
-			return chosenRow, err
-		} else if npCheckLower == strings.ToLower(rowCheckName) {
-			chosenRow = index + indexOfFirstCheck
-			return chosenRow, nil
+	if insertRow {
+		row := chosenRow - 1 // It must be doing an "insert below"
+		if err := InsertRow(int64(row), sheetID, spreadsheetID, srv); err != nil {
+			return 0, fmt.Errorf("error inserting a row in Google sheets: %s", err)
 		}
 	}
 
-	if chosenRow == 0 {
-		AddColumn(sheetID, spreadsheetID, srv)
-		chosenRow = lastIndex + indexOfFirstCheck + 1
-	}
-
-	err = WriteToCellWithColumnLetter(int64(chosenRow), "A", nodepingCheck, year, spreadsheetID, srv)
+	err = WriteToCellWithColumnLetter(int64(chosenRow), "A", nodePingCheck, year, spreadsheetID, srv)
 	return chosenRow, err
 }
 
@@ -201,7 +211,7 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 
 	uptimeResults, err := lib.GetUptimesForContactGroup(nodePingToken, contactGroupName, period)
 	if err != nil {
-		log.Fatalf("Error getting Nodeping results.  %v", err)
+		log.Fatalf("Error getting NodePing results.  %v", err)
 	}
 
 	// Get the human readable form of the month and year
@@ -229,7 +239,7 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 	index := 1
 	delaySeconds := time.Duration(22)
 
-	for nodepingCheck, percentage := range uptimeResults.Uptimes {
+	for nodePingCheck, percentage := range uptimeResults.Uptimes {
 		if index > countLimit {
 			break
 		}
@@ -240,9 +250,9 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 			time.Sleep(time.Second * delaySeconds)
 		}
 
-		checkRow, err := EnsureCheckRowExists(nodepingCheck, year, sheetsData)
+		checkRow, err := EnsureCheckRowExists(nodePingCheck, year, sheetsData)
 		if err != nil {
-			log.Fatalf("Error adding row for %s", nodepingCheck)
+			log.Fatalf("Error adding row for %s", nodePingCheck)
 		}
 
 		err = WriteToCellWithColumnIndex(

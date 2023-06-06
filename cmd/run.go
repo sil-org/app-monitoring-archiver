@@ -16,8 +16,8 @@ var (
 
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "Archive Nodeping results",
-	Long:  "Get the uptime results from Nodeping and write them to Google Sheets.",
+	Short: "Archive NodePing results",
+	Long:  "Get the uptime results from NodePing and write them to Google Sheets.",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if contactGroupName == "" {
@@ -39,7 +39,7 @@ func init() {
 		"contact-group",
 		"g",
 		"",
-		`Name of the Nodeping Contact Group to retrieve uptime data for.`,
+		`Name of the NodePing Contact Group to retrieve uptime data for.`,
 	)
 	runCmd.Flags().StringVarP(
 		&spreadsheetID,
@@ -58,5 +58,5 @@ func init() {
 }
 
 func runArchive() {
-	googlesheets.ArchiveResultsForMonth(contactGroupName, "LastMonth", spreadsheetID, nodepingToken, countLimit)
+	googlesheets.ArchiveResultsForMonth(contactGroupName, "LastMonth", spreadsheetID, nodePingToken, countLimit)
 }
