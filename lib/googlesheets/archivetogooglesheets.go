@@ -52,7 +52,7 @@ func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
 
 	doesSheetExist, sheetID, err = GetSheetIDFromTitle(sheetName, sheetsData)
 	if err != nil {
-		return 0, fmt.Errorf("Error finding newly created sheet %s. %v", sheetName, err)
+		return 0, fmt.Errorf("error finding newly created sheet %s. %v", sheetName, err)
 	}
 
 	if !doesSheetExist {
@@ -73,7 +73,7 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, monthsRange).Do()
 	if err != nil {
-		return 0, fmt.Errorf("Error getting month headings for %s: %s", monthsRange, err)
+		return 0, fmt.Errorf("error getting month headings for %s: %s", monthsRange, err)
 	}
 
 	indexOfFirstMonth := 1
@@ -156,23 +156,25 @@ func findRowPositionAndWhetherToInsertARow(checkName string, rows [][]any) (int,
 // Once it finds such an existing check name, it inserts a row above the existing row and then
 // inserts the new check name into the first cell of the inserted row.
 func EnsureCheckRowExists(nodePingCheck, year string, sheetsData SheetsData) (int, error) {
-	checksRange := fmt.Sprintf("%s!A3:A100", year)
+	const indexOfFirstCheck = 3
+	checksRange := fmt.Sprintf("%s!A%d:A100", year, indexOfFirstCheck)
 	srv := sheetsData.Service
 	spreadsheetID := sheetsData.SpreadsheetID
 	sheetID := sheetsData.SheetID
 
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, checksRange).Do()
 	if err != nil {
-		return 0, fmt.Errorf("Error getting NodePing Check names for %s: %s", nodePingCheck, err)
+		return 0, fmt.Errorf("error getting NodePing Check names for %s: %s", nodePingCheck, err)
 	}
 
-	const indexOfFirstCheck = 3
 	rowInRange, insertRow := findRowPositionAndWhetherToInsertARow(nodePingCheck, resp.Values)
 	chosenRow := rowInRange + indexOfFirstCheck
 
 	if insertRow {
 		row := chosenRow - 1 // It must be doing an "insert below"
-		InsertRow(int64(row), sheetID, spreadsheetID, srv)
+		if err := InsertRow(int64(row), sheetID, spreadsheetID, srv); err != nil {
+			return 0, fmt.Errorf("error inserting a row in Google sheets: %s", err)
+		}
 	}
 
 	err = WriteToCellWithColumnLetter(int64(chosenRow), "A", nodePingCheck, year, spreadsheetID, srv)
