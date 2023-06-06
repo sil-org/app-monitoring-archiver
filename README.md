@@ -2,7 +2,7 @@
 Gets app monitoring results and saves them to Google Sheets
 
 ## Description
-This app gets the previous month's uptime values for each Nodeping check that are associated with
+This app gets the previous month's uptime values for each NodePing check that are associated with
 a particular contact group.
 
 It then adds/inserts them into a Google sheet.
@@ -10,9 +10,9 @@ It then adds/inserts them into a Google sheet.
  - The month headings go from cell B2 to the right.
  - Each month's results are in a column starting at row 3.
  - The month columns do not get overwritten, just added to (inserted in chronological order).
- - The Nodeping check names go from A3 down.
- - Each row has the results for one Nodeping check (beginning at column B, one column per run of this app).
- - New rows for Nodeping checks are inserted in alphabetical order.  (If the existing checks are out of order,
+ - The NodePing check names go from A3 down.
+ - Each row has the results for one NodePing check (beginning at column B, one column per run of this app).
+ - New rows for NodePing checks are inserted in alphabetical order.  (If the existing checks are out of order,
    they will not be corrected.)
 
 

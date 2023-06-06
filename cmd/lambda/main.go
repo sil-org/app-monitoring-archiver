@@ -27,9 +27,9 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 		config.Period = "LastMonth"
 	}
 
-	nodepingToken := os.Getenv(cmd.NodepingTokenKey)
+	nodePingToken := os.Getenv(cmd.NodePingTokenKey)
 
-	if nodepingToken == "" {
+	if nodePingToken == "" {
 		log.Fatal("Error: Environment variable for NODEPING_TOKEN is required to execute plan and migration")
 	}
 
@@ -42,7 +42,7 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 		config.ContactGroupName,
 		config.Period,
 		config.SpreadSheetID,
-		nodepingToken,
+		nodePingToken,
 		intCountLimit,
 	)
 	return nil
