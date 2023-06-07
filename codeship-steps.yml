@@ -1,3 +1,7 @@
+- name: test
+  service: app
+  command: go test ./lib/googlesheets/...
+
 - name: deploy_prod
   service: app
   tag: main

@@ -108,6 +108,7 @@ func InsertRow(index, sheetID int64, spreadsheetID string, srv *sheets.Service) 
 	return InsertRowOrColumn(true, index, sheetID, spreadsheetID, srv)
 }
 
+// AddColumn inserts an additional column at the right of the existing columns of the Sheet
 func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) {
 	request := sheets.Request{
 		AppendDimension: &sheets.AppendDimensionRequest{
