@@ -101,7 +101,9 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 		}
 		if desiredMonthPosition < colMonthPosition {
 			chosenColumn = index + indexOfFirstMonth
-			InsertColumn(int64(chosenColumn), sheetID, spreadsheetID, srv)
+			if err := InsertColumn(int64(chosenColumn), sheetID, spreadsheetID, srv); err != nil {
+				return 0, fmt.Errorf("error inserting column in Google Sheets. %s", err)
+			}
 			err := WriteToCellWithColumnIndex(MonthHeaderRow, int64(chosenColumn), monthHeader, year, spreadsheetID, srv)
 			return chosenColumn, err
 		}
