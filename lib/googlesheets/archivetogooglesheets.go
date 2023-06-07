@@ -174,6 +174,7 @@ func EnsureCheckRowExists(nodePingCheck, year string, sheetsData SheetsData) (in
 
 	if insertRow {
 		row := chosenRow - 1 // It must be doing an "insert below"
+		log.Printf("Inserting row above row %d for NodePing check %s", chosenRow, nodePingCheck)
 		if err := InsertRow(int64(row), sheetID, spreadsheetID, srv); err != nil {
 			return 0, fmt.Errorf("error inserting a row in Google sheets: %s", err)
 		}
