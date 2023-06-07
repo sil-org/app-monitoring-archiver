@@ -52,7 +52,7 @@ func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
 
 	doesSheetExist, sheetID, err = GetSheetIDFromTitle(sheetName, sheetsData)
 	if err != nil {
-		return 0, fmt.Errorf("error finding newly created sheet %s. %v", sheetName, err)
+		return 0, fmt.Errorf("error finding newly created sheet %s. %w", sheetName, err)
 	}
 
 	if !doesSheetExist {
@@ -73,7 +73,7 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, monthsRange).Do()
 	if err != nil {
-		return 0, fmt.Errorf("error getting month headings for %s: %s", monthsRange, err)
+		return 0, fmt.Errorf("error getting month headings for %s: %w", monthsRange, err)
 	}
 
 	indexOfFirstMonth := 1
@@ -102,7 +102,7 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 		if desiredMonthPosition < colMonthPosition {
 			chosenColumn = index + indexOfFirstMonth
 			if err := InsertColumn(int64(chosenColumn), sheetID, spreadsheetID, srv); err != nil {
-				return 0, fmt.Errorf("error inserting column in Google Sheets. %s", err)
+				return 0, fmt.Errorf("error inserting column in Google Sheets. %w", err)
 			}
 			err := WriteToCellWithColumnIndex(MonthHeaderRow, int64(chosenColumn), monthHeader, year, spreadsheetID, srv)
 			return chosenColumn, err
@@ -166,7 +166,7 @@ func EnsureCheckRowExists(nodePingCheck, year string, sheetsData SheetsData) (in
 
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, checksRange).Do()
 	if err != nil {
-		return 0, fmt.Errorf("error getting NodePing Check names for %s: %s", nodePingCheck, err)
+		return 0, fmt.Errorf("error getting NodePing Check names for %s: %w", nodePingCheck, err)
 	}
 
 	rowInRange, insertRow := findRowPositionAndWhetherToInsertARow(nodePingCheck, resp.Values)
@@ -176,7 +176,7 @@ func EnsureCheckRowExists(nodePingCheck, year string, sheetsData SheetsData) (in
 		row := chosenRow - 1 // It must be doing an "insert below"
 		log.Printf("Inserting row above row %d for NodePing check %s", chosenRow, nodePingCheck)
 		if err := InsertRow(int64(row), sheetID, spreadsheetID, srv); err != nil {
-			return 0, fmt.Errorf("error inserting a row in Google sheets: %s", err)
+			return 0, fmt.Errorf("error inserting a row in Google sheets: %w", err)
 		}
 	}
 
@@ -209,12 +209,12 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 
 	srv, err := sheets.New(client)
 	if err != nil {
-		log.Fatalf("Unable to retrieve Sheets client: %v", err)
+		log.Fatalf("Unable to retrieve Sheets client: %s", err)
 	}
 
 	uptimeResults, err := lib.GetUptimesForContactGroup(nodePingToken, contactGroupName, period)
 	if err != nil {
-		log.Fatalf("Error getting NodePing results.  %v", err)
+		log.Fatalf("Error getting NodePing results.  %s", err)
 	}
 
 	// Get the human readable form of the month and year
@@ -236,7 +236,7 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 
 	monthColumn, err := EnsureMonthColumnExists(month, year, sheetsData)
 	if err != nil {
-		log.Fatalf("Error choosing column for %s.  %v", month, err)
+		log.Fatalf("Error choosing column for %s.  %s", month, err)
 	}
 
 	index := 1
