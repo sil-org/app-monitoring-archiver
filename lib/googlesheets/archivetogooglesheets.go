@@ -101,7 +101,9 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 		}
 		if desiredMonthPosition < colMonthPosition {
 			chosenColumn = index + indexOfFirstMonth
-			InsertColumn(int64(chosenColumn), sheetID, spreadsheetID, srv)
+			if err := InsertColumn(int64(chosenColumn), sheetID, spreadsheetID, srv); err != nil {
+				return 0, fmt.Errorf("error inserting column in Google Sheets. %s", err)
+			}
 			err := WriteToCellWithColumnIndex(MonthHeaderRow, int64(chosenColumn), monthHeader, year, spreadsheetID, srv)
 			return chosenColumn, err
 		}
@@ -172,6 +174,7 @@ func EnsureCheckRowExists(nodePingCheck, year string, sheetsData SheetsData) (in
 
 	if insertRow {
 		row := chosenRow - 1 // It must be doing an "insert below"
+		log.Printf("Inserting row above row %d for NodePing check %s", chosenRow, nodePingCheck)
 		if err := InsertRow(int64(row), sheetID, spreadsheetID, srv); err != nil {
 			return 0, fmt.Errorf("error inserting a row in Google sheets: %s", err)
 		}
