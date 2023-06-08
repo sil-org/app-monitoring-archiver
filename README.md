@@ -20,7 +20,7 @@ It then adds/inserts them into a Google sheet.
 
 ### NodePing
  - Ensure that all the NodePing Checks you want included in the Google Sheet
-   have a notification set to the group you will be polling for (e.g. "MyTeam Alerts")
+   have a notification set to the group you will be polling for (e.g. "MyTeam Alerts").
 
 ### Google API
  - Set up a Google API project and authentication credentials using a
