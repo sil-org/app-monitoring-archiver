@@ -1,6 +1,6 @@
 service: app-monitoring-archiver
 
-frameworkVersion: ^3.2.0
+frameworkVersion: ^3.36.0
 
 provider:
   name: aws
