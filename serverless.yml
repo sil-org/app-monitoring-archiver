@@ -11,7 +11,6 @@ provider:
   logRetentionInDays: 14
   tags:
     managed_by: serverless
-    workspace: ${self:custom.app_name}
     itse_app_name: ${self:custom.app_name}
     itse_app_customer: ${self:custom.customer}
     itse_app_env: production
