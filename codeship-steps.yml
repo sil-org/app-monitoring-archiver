@@ -6,8 +6,3 @@
   service: app
   tag: main
   command: ./codeship/deploy.sh prod
-
-- name: ga4track_deployment
-  service: ga4tracker
-  tag: ^(main|develop)
-  command: sh -c "export GA_EVENT_NAME=${CI_BRANCH}_app_monitoring_archiver && ./ga-event-tracker"

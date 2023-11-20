@@ -3,12 +3,3 @@ app:
     dockerfile_path: Dockerfile
   encrypted_env_file: aws.env.encrypted
   cached: true
-
-ga4tracker:
-  image: silintl/ga-event-tracker:1.0.2
-  encrypted_env_file: aws.env.encrypted
-  environment:
-    GA_MEASUREMENT_ID: G-NY4R8HM3Y3
-    GA_CLIENT_ID: app_monitoring_archiver
-    # GA_EVENT_NAME is set by the codeship-steps command
-    # Add to the aws.env.encrypted file ... GA_API_SECRET

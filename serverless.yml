@@ -1,14 +1,25 @@
 service: app-monitoring-archiver
 
-frameworkVersion: ^3.2.0
+frameworkVersion: ^3.36.0
 
 provider:
   name: aws
-  runtime: go1.x
+  runtime: provided.al2
   timeout: 600
   versionFunctions: false
   memorySize: 128
   logRetentionInDays: 14
+  tags:
+    managed_by: serverless
+    workspace: ${self:custom.app_name}
+    itse_app_name: ${self:custom.app_name}
+    itse_app_customer: ${self:custom.customer}
+    itse_app_env: production
+  stackTags:
+    name: cloudformation_stack-${self:custom.app_name}-${self:custom.customer}-production
+  deploymentBucket:
+    tags:
+      name: s3_bucket-${self:custom.app_name}-${self:custom.customer}-production
 
   environment:
     namespace: ${self:custom.namespace}
@@ -25,15 +36,17 @@ custom:
   dev:
     schedule: cron(40 14 1,20 * ? *)
   namespace: ${self:service}_${sls:stage}
+  app_name: app-monitoring-archiver
+  customer: gtis
 
 package:
   patterns:
   - '!./**'
-  - './bin/lambda'
+  - './bootstrap'
 
 functions:
   archiveToGoogleSheets:
-    handler: bin/lambda
+    handler: bootstrap
     events:
     - schedule:
         rate: ${self:custom.${sls:stage}.schedule}
@@ -42,3 +55,5 @@ functions:
           CountLimit: ${env:COUNT_LIMIT}
           Period: ${env:PERIOD}
           SpreadSheetID: ${env:SPREADSHEET_ID}
+    tags:
+      name: lambda_function-${self:custom.app_name}-${self:custom.customer}-production	  
