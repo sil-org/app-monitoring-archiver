@@ -1,0 +1,37 @@
+name: Continuous Integration
+
+on:
+  push:
+
+jobs:
+  test-and-deploy:
+    name: Test and Deploy
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.21
+
+      - name: Unit tests
+        run: go test -v ./lib/googlesheets/...
+
+      - name: Deploy
+        if: github.ref_name == 'main' || github.ref_name == 'develop'
+        env:
+          STAGE: ${{ vars.STAGE }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          NODEPING_TOKEN: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          CONTACT_GROUP_NAME: ${{ vars.CONTACT_GROUP_NAME }}
+          COUNT_LIMIT: ${{ vars.COUNT_LIMIT }}
+          PERIOD: ${{ vars.PERIOD }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GOOGLE_AUTH_CLIENT_EMAIL: ${{ secrets.GOOGLE_AUTH_CLIENT_EMAIL }}
+          GOOGLE_AUTH_PRIVATE_KEY_ID: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY_ID }}
+          GOOGLE_AUTH_PRIVATE_KEY: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY }}
+          GOOGLE_AUTH_TOKEN_URI: ${{ secrets.GOOGLE_AUTH_TOKEN_URI }}
+        run: docker-compose -f action-services.yml run deploy
