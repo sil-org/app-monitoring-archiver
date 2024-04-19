@@ -7,7 +7,7 @@ require (
 	github.com/silinternational/nodeping-cli v0.0.0-20190618205525-a054ccef23fc
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/net v0.18.0
+	golang.org/x/net v0.23.0
 	golang.org/x/oauth2 v0.14.0
 	google.golang.org/api v0.151.0
 )
@@ -27,8 +27,8 @@ require (
 	github.com/silinternational/nodeping-go-client v0.0.0-20190618205520-2203b33a9e99 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
