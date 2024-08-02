@@ -1,5 +1,6 @@
 module github.com/silinternational/app-monitoring-archiver
 
+// Ensure this tracks with Dockerfile
 go 1.22
 
 require (
