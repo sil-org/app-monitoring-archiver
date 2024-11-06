@@ -2,6 +2,8 @@ name: Continuous Integration
 
 on:
   push:
+    branches: [ '**' ]
+    paths-ignore: [ 'terraform/**' ]
 
 jobs:
   test-and-deploy:

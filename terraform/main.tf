@@ -4,8 +4,7 @@
  */
 module "serverless-user" {
   source  = "silinternational/serverless-user/aws"
-  version = "0.1.3"
+  version = "~> 0.4"
 
   app_name   = "app-monitoring-archiver"
-  aws_region = var.aws_region
 }
