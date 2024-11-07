@@ -6,5 +6,5 @@ module "serverless-user" {
   source  = "silinternational/serverless-user/aws"
   version = "~> 0.4"
 
-  app_name   = "app-monitoring-archiver"
+  app_name = "app-monitoring-archiver"
 }
