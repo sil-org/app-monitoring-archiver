@@ -8,7 +8,7 @@ require (
 	github.com/silinternational/nodeping-cli v0.0.0-20190618205525-a054ccef23fc
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/net v0.24.0
+	golang.org/x/net v0.33.0
 	golang.org/x/oauth2 v0.19.0
 	google.golang.org/api v0.176.1
 )
