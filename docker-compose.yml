@@ -1,8 +1,11 @@
 services:
-  app:
+
+  cdk:
     build: .
-    env_file:
-      - ./local.env
     volumes:
-      - ./:/src
-    command: ./scripts/build.sh cli
+    - ./cdk:/cdk
+    - ./bin:/bin
+    user: 1000:1001
+    env_file:
+    - path: local.env
+      required: false
