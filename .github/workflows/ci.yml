@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   test:
-    name: Test and Deploy
+    name: Test
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     steps:
@@ -47,7 +47,7 @@ jobs:
             aws-region: ${{ vars.AWS_REGION }}
   
         - name: Build
-          run: CGO_ENABLED=0 go build -C src -tags lambda.norpc -ldflags="-s -w" -o bin/bootstrap main.go
+          run: CGO_ENABLED=0 go build -tags lambda.norpc -ldflags="-s -w" -o bin/bootstrap cmd/lambda/main.go
   
         - name: Deploy
           env:
