@@ -25,9 +25,9 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 	}
 	const appName = "app-monitoring-archiver"
 	const customer = "gtis"
-	const envName = "production"
+	envName := os.Getenv("STAGE")
 
-	const functionName = "lambda_function-" + appName + "-" + customer + "-" + envName
+	functionName := "lambda_function-" + appName + "-" + customer + "-" + envName
 
 	nodepingToken := os.Getenv("NODEPING_TOKEN")
 	contactGroupName := os.Getenv("CONTACT_GROUP_NAME")
@@ -101,7 +101,7 @@ func main() {
 				"managed_by":        jsii.String("cdk"),
 				"itse_app_name":     jsii.String("app-monitoring-archiver"),
 				"itse_app_customer": jsii.String("gtis"),
-				"itse_app_env":      jsii.String("production"),
+				"itse_app_env":      jsii.String(os.Getenv("STAGE")),
 			},
 		},
 	})
