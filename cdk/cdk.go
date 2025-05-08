@@ -46,7 +46,7 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 	logGroup := awslogs.NewLogGroup(stack, jsii.String("LambdaLogGroup"), &awslogs.LogGroupProps{
 		LogGroupName:  jsii.String("/aws/lambda/" + functionName + "-cdk"),
 		Retention:     awslogs.RetentionDays_TWO_MONTHS,
-		RemovalPolicy: awscdk.RemovalPolicy_DESTROY, // Remove logs when stack is deleted
+		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
 	})
 
 
@@ -71,7 +71,6 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 		Timeout:       awscdk.Duration_Seconds(jsii.Number(600)),
 	})
 
-	// Schedule rule (cron: 30 3 1 * ? *)
 	rule := awsevents.NewRule(stack, jsii.String("ScheduleRule"), &awsevents.RuleProps{
 		Schedule: awsevents.Schedule_Cron(&awsevents.CronOptions{
 			Minute:  jsii.String("30"),
