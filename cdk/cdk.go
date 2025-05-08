@@ -101,7 +101,7 @@ func main() {
 				"managed_by":        jsii.String("cdk"),
 				"itse_app_name":     jsii.String("app-monitoring-archiver"),
 				"itse_app_customer": jsii.String("gtis"),
-				"itse_app_env":      jsii.String(os.Getenv("STAGE")),
+				"itse_app_env":      jsii.String("production"),
 			},
 		},
 	})
