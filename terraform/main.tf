@@ -7,4 +7,21 @@ module "serverless-user" {
   version = "~> 0.4"
 
   app_name = "app-monitoring-archiver"
+
+
+  policy_override = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sts:AssumeRole",
+        ]
+        Resource = [
+          "arn:aws:iam::*:role/cdk-*"
+        ]
+      }
+    ],
+  })
+
 }
