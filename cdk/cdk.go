@@ -96,7 +96,6 @@ func main() {
 		awscdk.StackProps{
 			Env: &awscdk.Environment{
 				Region: jsii.String(os.Getenv("AWS_REGION")),
-				Account: jsii.String(os.Getenv("AWS_ACCOUNT")),
 			},
 			Tags: &map[string]*string{
 				"managed_by":        jsii.String("cdk"),
