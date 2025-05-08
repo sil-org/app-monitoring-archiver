@@ -23,11 +23,11 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 	if props != nil {
 		sprops = props.StackProps
 	}
-	appName := "app-monitoring-archiver"
-	customer := "gtis"
-	envName := "production"
+	const appName = "app-monitoring-archiver"
+	const customer = "gtis"
+	const envName = "production"
 
-	functionName :="lambda_function-" + appName + "-" + customer + "-" + envName
+	const functionName = "lambda_function-" + appName + "-" + customer + "-" + envName
 
 	nodepingToken := os.Getenv("NODEPING_TOKEN")
 	contactGroupName := os.Getenv("CONTACT_GROUP_NAME")
@@ -50,7 +50,7 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 	})
 
 
-	function := awslambda.NewFunction(stack, &functionName, &awslambda.FunctionProps{
+	function := awslambda.NewFunction(stack,  jsii.String(functionName), &awslambda.FunctionProps{
 		Code: awslambda.Code_FromAsset(jsii.String("../bin"), nil),
 		Environment: &map[string]*string{
 			"NODEPING_TOKEN":             &nodepingToken,
@@ -63,7 +63,7 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 			"GOOGLE_AUTH_PRIVATE_KEY":    &googleAuthPrivateKey,
 			"GOOGLE_AUTH_TOKEN_URI":      &googleAuthTokenURI,
 		},
-		FunctionName:  &functionName,
+		FunctionName:  jsii.String(functionName),
 		Handler:       jsii.String("bootstrap"),
 		LoggingFormat: awslambda.LoggingFormat_JSON,
 		LogGroup:      logGroup,
@@ -97,6 +97,7 @@ func main() {
 		awscdk.StackProps{
 			Env: &awscdk.Environment{
 				Region: jsii.String(os.Getenv("AWS_REGION")),
+				Account: jsii.String(os.Getenv("AWS_ACCOUNT")),
 			},
 			Tags: &map[string]*string{
 				"managed_by":        jsii.String("cdk"),
