@@ -42,6 +42,23 @@ Note that these GOOGLE_AUTH_* variable values can be found in the json that Goog
 creating a services account.  Also note that the Go code itself will convert "\n" to EOL in the
 GOOGLE_AUTH_PRIVATE_KEY value.
 
+
+## AWS CDK
+
+To build and deploy:
+
+* Build the Go binary:
+
+```sh
+CGO_ENABLED=0 go build -tags lambda.norpc -ldflags="-s -w" -o bin/bootstrap cmd/lambda/main.go
+```
+
+* Deploy using CDK:
+
+```sh
+docker compose run --rm cdk cdk deploy
+```
+
 ### Run from command line
 
 ```sh

@@ -1,11 +1,14 @@
 cli:
-	docker compose up -d app
+	docker compose up -d cdk
 
 bash:
-	docker compose run --rm app bash
+	docker compose run --rm cdk bash
 
 test:
-	docker compose run --rm app bash -c "go test ./lib/googlesheets/..."
+	docker compose run --rm cdk bash -c "go test ./lib/googlesheets/..."
+
+deploy:
+	docker compose run --rm cdk cdk deploy
 
 clean:
 	docker compose kill

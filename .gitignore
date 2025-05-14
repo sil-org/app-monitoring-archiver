@@ -1,6 +1,3 @@
-# Serverless directories
-.serverless
-
 # Go output binary
 bootstrap
 
