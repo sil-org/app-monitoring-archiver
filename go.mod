@@ -1,4 +1,4 @@
-module github.com/silinternational/app-monitoring-archiver
+module github.com/sil-org/app-monitoring-archiver
 
 // Ensure this tracks with Dockerfile
 go 1.23.0

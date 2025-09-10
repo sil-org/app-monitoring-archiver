@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/silinternational/app-monitoring-archiver/lib/googlesheets"
+	"github.com/sil-org/app-monitoring-archiver/lib/googlesheets"
 )
 
 var (
