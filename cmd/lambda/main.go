@@ -7,8 +7,8 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 
-	"github.com/silinternational/app-monitoring-archiver/cmd"
-	"github.com/silinternational/app-monitoring-archiver/lib/googlesheets"
+	"github.com/sil-org/app-monitoring-archiver/cmd"
+	"github.com/sil-org/app-monitoring-archiver/lib/googlesheets"
 )
 
 type ArchiveToGoogleSheetsConfig struct {
