@@ -2,6 +2,6 @@
 aws.env
 codeship*.yml
 Dockerfile*
-docker-compose.yml
+compose.yaml
 Makefile
 README.md
