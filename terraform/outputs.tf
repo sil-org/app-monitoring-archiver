@@ -1,8 +1,8 @@
-
-output "serverless-access-key-id" {
-  value = module.serverless-user.aws_access_key_id
+output "cdk_access_key_id" {
+  value = aws_iam_access_key.cdk.id
 }
-output "serverless-secret-access-key" {
-  value     = module.serverless-user.aws_secret_access_key
+
+output "cdk_secret_access_key" {
+  value     = aws_iam_access_key.cdk.secret
   sensitive = true
 }
