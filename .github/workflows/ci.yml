@@ -2,8 +2,8 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ '**' ]
-    paths-ignore: [ 'terraform/**' ]
+    branches: ["**"]
+    paths-ignore: ["terraform/**"]
 
 concurrency:
   group: ${{ github.workflow}}-${{ github.ref }}
@@ -13,56 +13,56 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
 
       - name: Unit tests
         run: go test -v ./lib/googlesheets/...
   deploy:
-      name: Deploy
-      runs-on: ubuntu-latest
-      if: github.ref_name == 'main' || github.ref_name == 'develop'
-      needs: test
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-  
-        - name: Setup Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: "22"
-  
-        - name: Install AWS CDK
-          run: npm install -g aws-cdk
-  
-        - uses: aws-actions/configure-aws-credentials@v4
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: ${{ vars.AWS_REGION }}
-  
-        - name: Build
-          run: CGO_ENABLED=0 go build -tags lambda.norpc -ldflags="-s -w" -o bin/bootstrap cmd/lambda/main.go
-  
-        - name: Deploy
-          env:
-            STAGE: ${{ vars.STAGE }}
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION: ${{ vars.AWS_REGION }}
-            AWS_ACCOUNT: ${{ vars.AWS_ACCOUNT }}
-            NODEPING_TOKEN: ${{ secrets.NODEPING_TOKEN }}
-            CONTACT_GROUP_NAME: ${{ vars.CONTACT_GROUP_NAME }}
-            COUNT_LIMIT: ${{ vars.COUNT_LIMIT }}
-            PERIOD: ${{ vars.PERIOD }}
-            SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-            GOOGLE_AUTH_CLIENT_EMAIL: ${{ secrets.GOOGLE_AUTH_CLIENT_EMAIL }}
-            GOOGLE_AUTH_PRIVATE_KEY_ID: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY_ID }}
-            GOOGLE_AUTH_PRIVATE_KEY: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY }}
-            GOOGLE_AUTH_TOKEN_URI: ${{ secrets.GOOGLE_AUTH_TOKEN_URI }}
-          run: cd cdk && cdk deploy --require-approval never
+    name: Deploy
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'main' || github.ref_name == 'develop'
+    environment: ${{ github.ref_name }}
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Build
+        run: CGO_ENABLED=0 go build -tags lambda.norpc -ldflags="-s -w" -o bin/bootstrap cmd/lambda/main.go
+
+      - name: Deploy
+        env:
+          STAGE: ${{ vars.STAGE }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_ACCOUNT: ${{ vars.AWS_ACCOUNT }}
+          NODEPING_TOKEN: ${{ secrets.NODEPING_TOKEN }}
+          CONTACT_GROUP_NAME: ${{ vars.CONTACT_GROUP_NAME }}
+          COUNT_LIMIT: ${{ vars.COUNT_LIMIT }}
+          PERIOD: ${{ vars.PERIOD }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GOOGLE_AUTH_CLIENT_EMAIL: ${{ secrets.GOOGLE_AUTH_CLIENT_EMAIL }}
+          GOOGLE_AUTH_PRIVATE_KEY_ID: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY_ID }}
+          GOOGLE_AUTH_PRIVATE_KEY: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY }}
+          GOOGLE_AUTH_TOKEN_URI: ${{ secrets.GOOGLE_AUTH_TOKEN_URI }}
+        run: cd cdk && cdk deploy --require-approval never
