@@ -63,7 +63,7 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 			"GOOGLE_AUTH_PRIVATE_KEY":    &googleAuthPrivateKey,
 			"GOOGLE_AUTH_TOKEN_URI":      &googleAuthTokenURI,
 		},
-		FunctionName:  jsii.String(functionName),
+		FunctionName:  jsii.String(appName + "-" + customer + "-" + envName),
 		Handler:       jsii.String("bootstrap"),
 		LoggingFormat: awslambda.LoggingFormat_JSON,
 		LogGroup:      logGroup,
