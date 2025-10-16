@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/silinternational/nodeping-cli/lib"
+	"github.com/sil-org/nodeping-cli"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/sheets/v4"
@@ -119,12 +119,13 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 }
 
 // This returns a row number (0-indexed) and a boolean as to whether a row needs to be inserted.
-//  It begins by converting the first column of the rows to string values.
-//  If there are no cells in that column, it just returns (0, false).
-//  If it comes to a cell that is empty or matches the checkName value, it returns the
-//    corresponding row number and false.
-//  If it comes to a cell that has a value greater (alphabetically) than the checkName, it
-//    returns the corresponding row number and true (i.e. a row needs to be inserted)
+//
+//	It begins by converting the first column of the rows to string values.
+//	If there are no cells in that column, it just returns (0, false).
+//	If it comes to a cell that is empty or matches the checkName value, it returns the
+//	  corresponding row number and false.
+//	If it comes to a cell that has a value greater (alphabetically) than the checkName, it
+//	  returns the corresponding row number and true (i.e. a row needs to be inserted)
 func findRowPositionAndWhetherToInsertARow(checkName string, rows [][]any) (int, bool) {
 	if len(rows) == 0 || len(rows[0]) == 0 {
 		return 0, false
@@ -212,7 +213,12 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 		log.Fatalf("Unable to retrieve Sheets client: %s", err)
 	}
 
-	uptimeResults, err := lib.GetUptimesForContactGroup(nodePingToken, contactGroupName, period)
+	p, err := nodeping.GetPeriod(period)
+	if err != nil {
+		log.Fatalf("Error getting NodePing results: %s", err)
+	}
+
+	uptimeResults, err := nodeping.GetUptimesForContactGroup(nodePingToken, contactGroupName, *p)
 	if err != nil {
 		log.Fatalf("Error getting NodePing results.  %s", err)
 	}
