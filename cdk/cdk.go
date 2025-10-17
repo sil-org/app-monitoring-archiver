@@ -8,8 +8,6 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awseventstargets"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslogs"
-
-	// "github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -40,7 +38,6 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 	googleAuthPrivateKey := os.Getenv("GOOGLE_AUTH_PRIVATE_KEY")
 	googleAuthTokenURI := os.Getenv("GOOGLE_AUTH_TOKEN_URI")
 
-
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
 	logGroup := awslogs.NewLogGroup(stack, jsii.String("LambdaLogGroup"), &awslogs.LogGroupProps{
@@ -49,8 +46,7 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
 	})
 
-
-	function := awslambda.NewFunction(stack,  jsii.String(functionName), &awslambda.FunctionProps{
+	function := awslambda.NewFunction(stack, jsii.String(functionName), &awslambda.FunctionProps{
 		Code: awslambda.Code_FromAsset(jsii.String("../bin"), nil),
 		Environment: &map[string]*string{
 			"NODEPING_TOKEN":             &nodepingToken,
@@ -73,10 +69,10 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 
 	rule := awsevents.NewRule(stack, jsii.String("ScheduleRule"), &awsevents.RuleProps{
 		Schedule: awsevents.Schedule_Cron(&awsevents.CronOptions{
-			Minute:  jsii.String("30"),
-			Hour:    jsii.String("3"),
-			Day:     jsii.String("1"),
-			Month:   jsii.String("*"),
+			Minute: jsii.String("30"),
+			Hour:   jsii.String("3"),
+			Day:    jsii.String("1"),
+			Month:  jsii.String("*"),
 		}),
 	})
 

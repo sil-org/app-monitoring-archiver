@@ -1,14 +1,12 @@
 module github.com/sil-org/app-monitoring-archiver
 
 // Ensure this tracks with Dockerfile
-go 1.23.0
-
-toolchain go1.24.1
+go 1.25
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/silinternational/nodeping-cli v0.0.0-20190618205525-a054ccef23fc
-	github.com/spf13/cobra v1.8.0
+	github.com/sil-org/nodeping-cli v0.0.0-20251016195808-707837e41cad
+	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.38.0
 	golang.org/x/oauth2 v0.27.0
@@ -31,8 +29,8 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/silinternational/nodeping-go-client v0.0.0-20190618205520-2203b33a9e99 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/sil-org/nodeping-go-client v0.0.0-20250912043348-b0585b500abd // indirect
+	github.com/spf13/pflag v1.0.9 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.51.0 // indirect
 	go.opentelemetry.io/otel v1.26.0 // indirect
