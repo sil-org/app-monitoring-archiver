@@ -58,6 +58,7 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 			"GOOGLE_AUTH_PRIVATE_KEY_ID": &googleAuthPrivateKeyID,
 			"GOOGLE_AUTH_PRIVATE_KEY":    &googleAuthPrivateKey,
 			"GOOGLE_AUTH_TOKEN_URI":      &googleAuthTokenURI,
+			"APP_ENV":                    &envName,
 		},
 		FunctionName:  jsii.String(appName + "-" + customer + "-" + envName),
 		Handler:       jsii.String("bootstrap"),

@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/getsentry/sentry-go"
 
 	"github.com/sil-org/app-monitoring-archiver/cmd"
 	"github.com/sil-org/app-monitoring-archiver/lib/googlesheets"
@@ -19,6 +20,7 @@ type ArchiveToGoogleSheetsConfig struct {
 }
 
 func main() {
+	sentryInit()
 	lambda.Start(handler)
 }
 
@@ -46,4 +48,19 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 		intCountLimit,
 	)
 	return nil
+}
+
+func sentryInit() {
+	dsn := os.Getenv("SENTRY_DSN")
+	if dsn == "" {
+		return
+	}
+
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:         dsn,
+		EnableLogs:  true,
+		Environment: os.Getenv("APP_ENV"),
+	}); err != nil {
+		log.Printf("Sentry initialization failed: %v\n", err)
+	}
 }
