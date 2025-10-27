@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -18,6 +19,7 @@ type ArchiveToGoogleSheetsConfig struct {
 	Period           string
 	SpreadSheetID    string
 	CountLimit       string
+	SentryDSN        string
 }
 
 func main() {
@@ -34,41 +36,51 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 		config.Period = "LastMonth"
 	}
 
-	nodePingToken := os.Getenv(cmd.NodePingTokenKey)
-
-	if nodePingToken == "" {
-		log.Fatal("Error: Environment variable for NODEPING_TOKEN is required to execute plan and migration")
+	nodePingToken, err := getRequiredEnv(cmd.NodePingTokenKey)
+	if err != nil {
+		sentry.CaptureException(err)
+		log.Fatalln(err)
 	}
 
 	intCountLimit, err := strconv.Atoi(config.CountLimit)
 	if err != nil {
-		log.Fatalf("Error converting CountLimit of %s to integer. %v", config.CountLimit, err)
+		err = fmt.Errorf("error converting CountLimit '%s' to integer: %w", config.CountLimit, err)
+		sentry.CaptureException(err)
+		log.Fatalln(err)
 	}
 
-	googlesheets.ArchiveResultsForMonth(
+	err = googlesheets.ArchiveResultsForMonth(
 		config.ContactGroupName,
 		config.Period,
 		config.SpreadSheetID,
 		nodePingToken,
 		intCountLimit,
 	)
+	sentry.CaptureException(err)
+	log.Fatalln(err)
 	return nil
 }
 
 func initSentry(dsn string) {
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn:         dsn,
-		EnableLogs:  true,
-		Environment: getEnv("APP_ENV", "production"),
+		Environment: getEnv("APP_ENV", "prod"),
 	})
 	if err != nil {
-		log.Printf("Sentry initialization failed: %v\n", err)
+		log.Println("Sentry initialization failed:", err)
 	}
 }
 
 func getEnv(name, fallback string) string {
-	if v := os.Getenv(name); v != "" {
-		return v
+	if value := os.Getenv(name); value != "" {
+		return value
 	}
 	return fallback
+}
+
+func getRequiredEnv(name string) (string, error) {
+	if value := os.Getenv(name); value != "" {
+		return value, nil
+	}
+	return "", fmt.Errorf("missing required env var: %s", name)
 }

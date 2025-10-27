@@ -57,7 +57,7 @@ func WriteToCellWithColumnLetter(rowIndex int64, columnLetter, newValue, sheetNa
 
 	_, err := srv.Spreadsheets.Values.Update(spreadsheetID, cellRange, valueRange).ValueInputOption("RAW").Do()
 	if err != nil {
-		return fmt.Errorf("Unable to write to cell %s. %v", cellRange, err)
+		return fmt.Errorf("unable to write to cell '%s': %w", cellRange, err)
 	}
 
 	return nil
@@ -109,7 +109,7 @@ func InsertRow(index, sheetID int64, spreadsheetID string, srv *sheets.Service) 
 }
 
 // AddColumn inserts an additional column at the right of the existing columns of the Sheet
-func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) {
+func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) error {
 	request := sheets.Request{
 		AppendDimension: &sheets.AppendDimensionRequest{
 			Dimension: "COLUMNS",
@@ -123,8 +123,9 @@ func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) {
 	}
 	_, err := srv.Spreadsheets.BatchUpdate(spreadsheetID, rbb).Context(context.Background()).Do()
 	if err != nil {
-		log.Fatalf("Unable to add column to sheet %d. %s", sheetID, err)
+		return fmt.Errorf("Unable to add column to sheet %d. %s", sheetID, err)
 	}
+	return nil
 }
 
 func GetSheetIDFromTitle(title string, sheetsData SheetsData) (bool, int64, error) {

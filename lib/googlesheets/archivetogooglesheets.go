@@ -43,7 +43,7 @@ func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
 		srv := sheetsData.Service
 		_, err := srv.Spreadsheets.BatchUpdate(spreadsheetID, rbb).Context(context.Background()).Do()
 		if err != nil {
-			return 0, fmt.Errorf("Unable to create new sheet %s. %s", sheetName, err)
+			return 0, fmt.Errorf("unable to create new sheet %s. %s", sheetName, err)
 		}
 
 		_ = WriteToCellWithColumnLetter(1, "B", "Uptime Percent", sheetName, spreadsheetID, srv)
@@ -56,7 +56,7 @@ func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
 	}
 
 	if !doesSheetExist {
-		return 0, fmt.Errorf("Unable to find newly created sheet %s.", sheetName)
+		return 0, fmt.Errorf("unable to find newly created sheet %s.", sheetName)
 	}
 
 	return sheetID, nil
@@ -110,7 +110,9 @@ func EnsureMonthColumnExists(month, year string, sheetsData SheetsData) (int, er
 	}
 
 	if chosenColumn == 0 {
-		AddColumn(sheetID, spreadsheetID, srv)
+		if err := AddColumn(sheetID, spreadsheetID, srv); err != nil {
+			return 0, err
+		}
 		chosenColumn = lastIndex + indexOfFirstMonth + 1
 	}
 
@@ -200,7 +202,7 @@ func GetAuthConfig() *jwt.Config {
 	return config
 }
 
-func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingToken string, countLimit int) {
+func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingToken string, countLimit int) error {
 	if countLimit < 1 {
 		countLimit = 1000
 	}
@@ -210,17 +212,17 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 
 	srv, err := sheets.New(client)
 	if err != nil {
-		log.Fatalf("Unable to retrieve Sheets client: %s", err)
+		return fmt.Errorf("unable to retrieve Sheets client: %w", err)
 	}
 
 	p, err := nodeping.GetPeriod(period)
 	if err != nil {
-		log.Fatalf("Error getting NodePing results: %s", err)
+		return fmt.Errorf("error getting NodePing period: %w", err)
 	}
 
 	uptimeResults, err := nodeping.GetUptimesForContactGroup(nodePingToken, contactGroupName, *p)
 	if err != nil {
-		log.Fatalf("Error getting NodePing results.  %s", err)
+		return fmt.Errorf("error getting NodePing results: %w", err)
 	}
 
 	// Get the human readable form of the month and year
@@ -235,18 +237,18 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 
 	sheetID, err := EnsureSheetExists(year, sheetsData)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	sheetsData.SheetID = sheetID
 
 	monthColumn, err := EnsureMonthColumnExists(month, year, sheetsData)
 	if err != nil {
-		log.Fatalf("Error choosing column for %s.  %s", month, err)
+		return fmt.Errorf("error choosing column for '%s': %w", month, err)
 	}
 
 	index := 1
-	delaySeconds := time.Duration(22)
+	const delaySeconds = time.Second * 22
 
 	for nodePingCheck, percentage := range uptimeResults.Uptimes {
 		if index > countLimit {
@@ -256,12 +258,12 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 		// The quota is 100 writes per 100 seconds per user
 		if index%20 == 0 {
 			fmt.Printf("Waiting %v seconds at index %d to avoid Google Api rate limiting.\n", delaySeconds.Seconds(), index)
-			time.Sleep(time.Second * delaySeconds)
+			time.Sleep(delaySeconds)
 		}
 
 		checkRow, err := EnsureCheckRowExists(nodePingCheck, year, sheetsData)
 		if err != nil {
-			log.Fatalf("Error adding row for %s", nodePingCheck)
+			return fmt.Errorf("error adding row for '%s'", nodePingCheck)
 		}
 
 		err = WriteToCellWithColumnIndex(
@@ -272,4 +274,5 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 
 		index += 1
 	}
+	return nil
 }
