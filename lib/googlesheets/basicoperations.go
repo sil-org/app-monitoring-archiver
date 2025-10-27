@@ -123,7 +123,7 @@ func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) error {
 	}
 	_, err := srv.Spreadsheets.BatchUpdate(spreadsheetID, rbb).Context(context.Background()).Do()
 	if err != nil {
-		return fmt.Errorf("Unable to add column to sheet %d. %s", sheetID, err)
+		return fmt.Errorf("unable to add column to sheet '%d': %w", sheetID, err)
 	}
 	return nil
 }
