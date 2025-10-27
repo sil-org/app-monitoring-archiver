@@ -56,8 +56,10 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 		nodePingToken,
 		intCountLimit,
 	)
-	sentry.CaptureException(err)
-	log.Fatalln(err)
+	if err != nil {
+		sentry.CaptureException(err)
+		log.Fatalln(err)
+	}
 	return nil
 }
 
