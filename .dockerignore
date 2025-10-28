@@ -1,6 +1,5 @@
 *.aes
 aws.env
-codeship*.yml
 Dockerfile*
 compose.yaml
 Makefile
