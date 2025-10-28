@@ -65,6 +65,6 @@ jobs:
           GOOGLE_AUTH_PRIVATE_KEY_ID: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY_ID }}
           GOOGLE_AUTH_PRIVATE_KEY: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY }}
           GOOGLE_AUTH_TOKEN_URI: ${{ secrets.GOOGLE_AUTH_TOKEN_URI }}
-          APP_ENV: ${{ vars.APP_ENV }}
+          APP_ENV: "prod"
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: cd cdk && cdk deploy --require-approval never
