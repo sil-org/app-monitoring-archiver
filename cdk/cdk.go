@@ -50,10 +50,6 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 		Code: awslambda.Code_FromAsset(jsii.String("../bin"), nil),
 		Environment: &map[string]*string{
 			"NODEPING_TOKEN":             &nodepingToken,
-			"CONTACT_GROUP_NAME":         &contactGroupName,
-			"COUNT_LIMIT":                &countLimit,
-			"PERIOD":                     &period,
-			"SPREADSHEET_ID":             &spreadsheetID,
 			"GOOGLE_AUTH_CLIENT_EMAIL":   &googleAuthClientEmail,
 			"GOOGLE_AUTH_PRIVATE_KEY_ID": &googleAuthPrivateKeyID,
 			"GOOGLE_AUTH_PRIVATE_KEY":    &googleAuthPrivateKey,
@@ -79,6 +75,12 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 
 	rule.AddTarget(awseventstargets.NewLambdaFunction(function, &awseventstargets.LambdaFunctionProps{
 		RetryAttempts: jsii.Number(0),
+		Event: awsevents.RuleTargetInput_FromObject(&map[string]*string{
+			"ContactGroupName": &contactGroupName,
+			"CountLimit":       &countLimit,
+			"Period":           &period,
+			"SpreadSheetID":    &spreadsheetID,
+		}),
 	}))
 
 	return stack
