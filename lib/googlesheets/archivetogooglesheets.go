@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sil-org/nodeping-cli"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/sheets/v4"
+
+	"github.com/sil-org/app-monitoring-archiver/lib/nodeping"
 )
 
 const MonthHeaderRow = 2
