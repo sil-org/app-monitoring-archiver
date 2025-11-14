@@ -42,9 +42,6 @@ func TestListChecks(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-	}
 }
 
 func TestListChecksMock(t *testing.T) {
@@ -110,10 +107,6 @@ func TestListChecksMock(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	checkCount := len(checks)
 	expectedCount := 4
@@ -144,18 +137,10 @@ func TestGetCheck(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	check, err := client.GetCheck(checks[0].ID)
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -191,10 +176,6 @@ func TestGetCheckMock(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	expected := "Example1"
 	if check.Label != expected {
@@ -218,10 +199,6 @@ func TestListContactGroups(t *testing.T) {
 	}
 
 	t.Logf("CGs: %+v", cgs)
-
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-	}
 }
 
 func TestListContactGroupsMock(t *testing.T) {
@@ -243,11 +220,6 @@ func TestListContactGroupsMock(t *testing.T) {
 	cgs, err := client.ListContactGroups()
 	if err != nil {
 		t.Error(err)
-		return
-	}
-
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -278,18 +250,10 @@ func TestGetResultUptime(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	uptimes, err := client.GetUptime(checks[0].ID, Period{})
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -312,10 +276,6 @@ func TestGetResultUptimeWithParams(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	// Dec 1, 2010 - Dec 1, 2030
 	period := Period{
@@ -325,10 +285,6 @@ func TestGetResultUptimeWithParams(t *testing.T) {
 	uptimes, err := client.GetUptime(checks[0].ID, period)
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -356,10 +312,6 @@ func TestGetResultUptimeMock(t *testing.T) {
 	uptimes, err := client.GetUptime("2018090614528ABCD", Period{})
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 

@@ -3,9 +3,10 @@ package nodeping
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"sort"
-
-	"gopkg.in/resty.v1"
+	"time"
 )
 
 const (
@@ -23,8 +24,8 @@ type ClientConfig struct {
 // Client holds config and provides methods for various api calls
 type Client struct {
 	Config      ClientConfig
-	Error       NodePingError
-	R           *resty.Request
+	httpClient  *http.Client
+	header      http.Header
 	MockResults string
 }
 
@@ -45,11 +46,9 @@ func New(config ClientConfig) (*Client, error) {
 	client.Config.CustomerID = config.CustomerID
 	client.MockResults = ""
 
-	resty.SetHostURL(client.Config.BaseURL)
-	resty.SetBasicAuth(client.Config.Token, "")
-	resty.SetHeader("user-agent", "sil-org/app-monitoring-archiver "+Version)
-	client.R = resty.R()
-	client.R.SetError(&client.Error)
+	client.httpClient = &http.Client{Timeout: time.Second * 30}
+	client.header = http.Header{}
+	client.header.Set("user-agent", "sil-org/app-monitoring-archiver "+Version)
 
 	return &client, nil
 }
@@ -65,10 +64,8 @@ func (c *Client) ListChecks() ([]CheckResponse, error) {
 	if c.MockResults != "" {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 	} else {
-		_, err := c.R.SetResult(&listObj).Get(path)
-		errChk := c.CheckForError(err)
-		if errChk != nil {
-			return []CheckResponse{}, errChk
+		if err := c.Request(path, &listObj); err != nil {
+			return nil, err
 		}
 	}
 
@@ -90,10 +87,8 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 		return check, nil
 	}
 
-	_, err := c.R.SetResult(&check).Get(path)
-	errChk := c.CheckForError(err)
-	if errChk != nil {
-		return CheckResponse{}, errChk
+	if err := c.Request(path, &check); err != nil {
+		return CheckResponse{}, err
 	}
 
 	return check, nil
@@ -127,10 +122,8 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 		return listObj, nil
 	}
 
-	_, err := c.R.SetResult(&listObj).Get(path)
-	errChk := c.CheckForError(err)
-	if errChk != nil {
-		return map[string]UptimeResponse{}, errChk
+	if err := c.Request(path, &listObj); err != nil {
+		return nil, err
 	}
 
 	return listObj, nil
@@ -140,7 +133,7 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 	path := "/contactgroups"
 	if c.Config.CustomerID != "" {
-		path = fmt.Sprintf("/checks/%s", c.Config.CustomerID)
+		path = fmt.Sprintf("/contactgroups/%s", c.Config.CustomerID)
 	}
 	var listObj map[string]ContactGroupResponse
 
@@ -148,24 +141,11 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 		return listObj, nil
 	}
-
-	_, err := c.R.SetResult(&listObj).Get(path)
-	errChk := c.CheckForError(err)
-	if errChk != nil {
-		return map[string]ContactGroupResponse{}, errChk
+	if err := c.Request(path, &listObj); err != nil {
+		return nil, err
 	}
 
 	return listObj, nil
-}
-
-func (c *Client) CheckForError(err error) error {
-	if err != nil {
-		return err
-	}
-	if c.Error.Error != "" {
-		return fmt.Errorf("%s", c.Error.Error)
-	}
-	return nil
 }
 
 func (c *Client) GetContactGroupIDFromName(contactGroupName string) (string, error) {
@@ -233,6 +213,36 @@ func (c *Client) GetUptimesForChecks(checkIDs map[string]string, period Period) 
 	}
 
 	return uptimes
+}
+
+func (c *Client) Request(path string, v any) error {
+	req, err := http.NewRequest("GET", c.Config.BaseURL+path, nil)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
+	req.Header = c.header
+	req.SetBasicAuth(c.Config.Token, "")
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("error sending request: %w", err)
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
+
+	if res.StatusCode != 200 {
+		return fmt.Errorf("unexpected status code %d, body: %s", res.StatusCode, body[0:min(250, len(body))])
+	}
+
+	err = json.Unmarshal(body, &v)
+	if err != nil {
+		return fmt.Errorf("invalid response body %s: %w", body, err)
+	}
+	return nil
 }
 
 func GetUptimesForContactGroup(token, group string, period Period) (UptimeResults, error) {
