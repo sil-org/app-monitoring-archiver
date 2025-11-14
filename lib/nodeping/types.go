@@ -67,3 +67,10 @@ type ContactGroupResponse struct {
 	Name       string `json:"name"`
 	Members    []any  `json:"members"`
 }
+
+type UptimeResults struct {
+	CheckLabels []string
+	Uptimes     map[string]float32
+	StartTime   int64
+	EndTime     int64
+}

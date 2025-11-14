@@ -3,6 +3,7 @@ package nodeping
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"gopkg.in/resty.v1"
 )
@@ -65,7 +66,7 @@ func (c *Client) ListChecks() ([]CheckResponse, error) {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 	} else {
 		_, err := c.R.SetResult(&listObj).Get(path)
-		errChk := CheckForError(err, c)
+		errChk := c.CheckForError(err)
 		if errChk != nil {
 			return []CheckResponse{}, errChk
 		}
@@ -90,7 +91,7 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 	}
 
 	_, err := c.R.SetResult(&check).Get(path)
-	errChk := CheckForError(err, c)
+	errChk := c.CheckForError(err)
 	if errChk != nil {
 		return CheckResponse{}, errChk
 	}
@@ -127,7 +128,7 @@ func (c *Client) GetUptime(id string, start, end int64) (map[string]UptimeRespon
 	}
 
 	_, err := c.R.SetResult(&listObj).Get(path)
-	errChk := CheckForError(err, c)
+	errChk := c.CheckForError(err)
 	if errChk != nil {
 		return map[string]UptimeResponse{}, errChk
 	}
@@ -149,7 +150,7 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 	}
 
 	_, err := c.R.SetResult(&listObj).Get(path)
-	errChk := CheckForError(err, c)
+	errChk := c.CheckForError(err)
 	if errChk != nil {
 		return map[string]ContactGroupResponse{}, errChk
 	}
@@ -157,12 +158,116 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 	return listObj, nil
 }
 
-func CheckForError(err error, client *Client) error {
+func (c *Client) CheckForError(err error) error {
 	if err != nil {
 		return err
 	}
-	if client.Error.Error != "" {
-		return fmt.Errorf("%s", client.Error.Error)
+	if c.Error.Error != "" {
+		return fmt.Errorf("%s", c.Error.Error)
 	}
 	return nil
+}
+
+func (c *Client) GetContactGroupIDFromName(contactGroupName string) (string, error) {
+	contactGroups, err := c.ListContactGroups()
+	if err != nil {
+		return "", fmt.Errorf("error retrieving contact groups: %w", err)
+	}
+
+	cgID := ""
+	for cgKey, cg := range contactGroups {
+		if cg.Name == contactGroupName {
+			cgID = cgKey
+			break
+		}
+	}
+
+	if cgID == "" {
+		return "", fmt.Errorf(`contact group not found with name: "%s"`, contactGroupName)
+	}
+
+	return cgID, nil
+}
+
+func (c *Client) GetCheckIDsAndLabels(id string) ([]string, map[string]string, error) {
+	checkIDs := map[string]string{}
+	checkLabels := []string{}
+
+	checks, err := c.ListChecks()
+	if err != nil {
+		return checkLabels, checkIDs, err
+	}
+
+	for _, check := range checks {
+		// Notifications is a list of maps with the contactGroup ID as keys
+		for _, notification := range check.Notifications {
+			foundOne := false
+			for nKey := range notification {
+				if nKey == id {
+					checkIDs[check.Label] = check.ID
+					checkLabels = append(checkLabels, check.Label)
+					foundOne = true
+					break
+				}
+			}
+			if foundOne {
+				break
+			}
+		}
+	}
+
+	sort.Strings(checkLabels)
+	return checkLabels, checkIDs, nil
+}
+
+func (c *Client) GetUptimesForChecks(checkIDs map[string]string, start, end int64) map[string]float32 {
+	uptimes := map[string]float32{}
+
+	for _, checkID := range checkIDs {
+		nextUptime, err := c.GetUptime(checkID, start, end)
+		if err != nil {
+			fmt.Printf("Error getting uptime for check ID %s.\n%s\n", checkID, err.Error())
+			continue
+		}
+		uptimes[checkID] = nextUptime["total"].Uptime
+	}
+
+	return uptimes
+}
+
+func GetUptimesForContactGroup(token, group string, period Period) (UptimeResults, error) {
+	var emptyResults UptimeResults
+	npClient, err := New(ClientConfig{Token: token})
+	if err != nil {
+		return emptyResults, fmt.Errorf("error initializing cli: %w", err)
+	}
+
+	cgID, err := npClient.GetContactGroupIDFromName(group)
+	if err != nil {
+		return emptyResults, err
+	}
+
+	checkLabels, checkIDs, err := npClient.GetCheckIDsAndLabels(cgID)
+	if err != nil {
+		return emptyResults, err
+	}
+
+	start := period.From.Unix() * 1000
+	end := period.To.Unix() * 1000
+
+	uptimes := npClient.GetUptimesForChecks(checkIDs, start, end)
+	uptimesByLabel := map[string]float32{}
+
+	for _, label := range checkLabels {
+		uptimesByLabel[label] = uptimes[checkIDs[label]]
+	}
+
+	results := UptimeResults{
+		CheckLabels: checkLabels,
+		Uptimes:     uptimesByLabel,
+		StartTime:   start / 1000,
+		EndTime:     end / 1000,
+	}
+
+	return results, nil
 }
