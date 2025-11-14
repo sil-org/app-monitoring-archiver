@@ -59,7 +59,10 @@ func (c *Client) ListChecks() ([]CheckResponse, error) {
 	var listObj map[string]CheckResponse
 
 	if c.MockResults != "" {
-		json.Unmarshal([]byte(c.MockResults), &listObj)
+		err := json.Unmarshal([]byte(c.MockResults), &listObj)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		if err := c.request(path, &listObj); err != nil {
 			return nil, err
@@ -80,7 +83,10 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 	var check CheckResponse
 
 	if c.MockResults != "" {
-		json.Unmarshal([]byte(c.MockResults), &check)
+		err := json.Unmarshal([]byte(c.MockResults), &check)
+		if err != nil {
+			return CheckResponse{}, err
+		}
 		return check, nil
 	}
 
@@ -115,7 +121,10 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 	var listObj map[string]UptimeResponse
 
 	if c.MockResults != "" {
-		json.Unmarshal([]byte(c.MockResults), &listObj)
+		err := json.Unmarshal([]byte(c.MockResults), &listObj)
+		if err != nil {
+			return nil, err
+		}
 		return listObj, nil
 	}
 
@@ -135,7 +144,10 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 	var listObj map[string]ContactGroupResponse
 
 	if c.MockResults != "" {
-		json.Unmarshal([]byte(c.MockResults), &listObj)
+		err := json.Unmarshal([]byte(c.MockResults), &listObj)
+		if err != nil {
+			return nil, err
+		}
 		return listObj, nil
 	}
 	if err := c.request(path, &listObj); err != nil {
