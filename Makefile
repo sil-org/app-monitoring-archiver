@@ -5,7 +5,7 @@ bash:
 	docker compose run --rm cdk bash
 
 test:
-	docker compose run --rm cdk bash -c "go test ./lib/googlesheets/..."
+	go test ./...
 
 deploy:
 	docker compose run --rm cdk cdk deploy
