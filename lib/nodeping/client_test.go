@@ -319,8 +319,8 @@ func TestGetResultUptimeWithParams(t *testing.T) {
 
 	// Dec 1, 2010 - Dec 1, 2030
 	period := Period{
-		From: time.Unix(int64(12911616000), 0),
-		To:   time.Unix(int64(19223136000), 0),
+		From: time.Unix(int64(1291161600), 0),
+		To:   time.Unix(int64(1922313600), 0),
 	}
 	uptimes, err := client.GetUptime(checks[0].ID, period)
 	if err != nil {
