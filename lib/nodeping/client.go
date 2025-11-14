@@ -19,8 +19,6 @@ type ClientConfig struct {
 	CustomerID string
 }
 
-var client Client
-
 // Client holds config and provides methods for various api calls
 type Client struct {
 	Config      ClientConfig
@@ -29,8 +27,10 @@ type Client struct {
 	MockResults string
 }
 
-// Initialize new Client
+// New creates a new Client
 func New(config ClientConfig) (*Client, error) {
+	var client Client
+
 	if config.Token == "" {
 		return &Client{}, fmt.Errorf("token is required in ClientConfig")
 	}
