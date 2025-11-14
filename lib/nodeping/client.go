@@ -19,42 +19,42 @@ type ClientConfig struct {
 	CustomerID string
 }
 
-var Client NodePingClient
+var client Client
 
-// NodePingClient holds config and provides methods for various api calls
-type NodePingClient struct {
+// Client holds config and provides methods for various api calls
+type Client struct {
 	Config      ClientConfig
 	Error       NodePingError
 	R           *resty.Request
 	MockResults string
 }
 
-// Initialize new NodePingClient
-func New(config ClientConfig) (*NodePingClient, error) {
+// Initialize new Client
+func New(config ClientConfig) (*Client, error) {
 	if config.Token == "" {
-		return &NodePingClient{}, fmt.Errorf("token is required in ClientConfig")
+		return &Client{}, fmt.Errorf("token is required in ClientConfig")
 	}
-	Client.Config.Token = config.Token
+	client.Config.Token = config.Token
 
-	Client.Config.BaseURL = BaseURL
+	client.Config.BaseURL = BaseURL
 	if config.BaseURL != "" {
-		Client.Config.BaseURL = config.BaseURL
+		client.Config.BaseURL = config.BaseURL
 	}
 
-	Client.Config.CustomerID = config.CustomerID
-	Client.MockResults = ""
+	client.Config.CustomerID = config.CustomerID
+	client.MockResults = ""
 
-	resty.SetHostURL(Client.Config.BaseURL)
-	resty.SetBasicAuth(Client.Config.Token, "")
+	resty.SetHostURL(client.Config.BaseURL)
+	resty.SetBasicAuth(client.Config.Token, "")
 	resty.SetHeader("user-agent", "sil-org/app-monitoring-archiver "+Version)
-	Client.R = resty.R()
-	Client.R.SetError(&Client.Error)
+	client.R = resty.R()
+	client.R.SetError(&client.Error)
 
-	return &Client, nil
+	return &client, nil
 }
 
 // ListChecks retrieves all the "Checks" in NodePing
-func (c *NodePingClient) ListChecks() ([]CheckResponse, error) {
+func (c *Client) ListChecks() ([]CheckResponse, error) {
 	path := "/checks"
 	if c.Config.CustomerID != "" {
 		path = fmt.Sprintf("/checks/%s", c.Config.CustomerID)
@@ -80,7 +80,7 @@ func (c *NodePingClient) ListChecks() ([]CheckResponse, error) {
 }
 
 // GetCheck retrieves data about one Check using its id
-func (c *NodePingClient) GetCheck(id string) (CheckResponse, error) {
+func (c *Client) GetCheck(id string) (CheckResponse, error) {
 	path := fmt.Sprintf("/checks/%s", id)
 	var check CheckResponse
 
@@ -99,7 +99,7 @@ func (c *NodePingClient) GetCheck(id string) (CheckResponse, error) {
 }
 
 // GetUptime retrieves the uptime entries for a certain check within an optional date range (by Timestamp with microseconds)
-func (c *NodePingClient) GetUptime(id string, start, end int64) (map[string]UptimeResponse, error) {
+func (c *Client) GetUptime(id string, start, end int64) (map[string]UptimeResponse, error) {
 	// Build path with potentially a "?" and "&" symbols
 	// I'm not getting c.R's built in query param functions to work properly
 	pathDelimiter := ""
@@ -136,7 +136,7 @@ func (c *NodePingClient) GetUptime(id string, start, end int64) (map[string]Upti
 }
 
 // ListContactGroups retrieves the list of Contact Groups
-func (c *NodePingClient) ListContactGroups() (map[string]ContactGroupResponse, error) {
+func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 	path := "/contactgroups"
 	if c.Config.CustomerID != "" {
 		path = fmt.Sprintf("/checks/%s", c.Config.CustomerID)
@@ -157,7 +157,7 @@ func (c *NodePingClient) ListContactGroups() (map[string]ContactGroupResponse, e
 	return listObj, nil
 }
 
-func CheckForError(err error, client *NodePingClient) error {
+func CheckForError(err error, client *Client) error {
 	if err != nil {
 		return err
 	}

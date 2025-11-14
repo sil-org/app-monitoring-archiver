@@ -12,7 +12,7 @@ type UptimeResults struct {
 	EndTime     int64
 }
 
-func GetContactGroupIDFromName(contactGroupName string, npClient *NodePingClient) (string, error) {
+func GetContactGroupIDFromName(contactGroupName string, npClient *Client) (string, error) {
 	contactGroups, err := npClient.ListContactGroups()
 	if err != nil {
 		return "", fmt.Errorf("error retrieving contact groups: %w", err)
@@ -33,7 +33,7 @@ func GetContactGroupIDFromName(contactGroupName string, npClient *NodePingClient
 	return cgID, nil
 }
 
-func GetCheckIDsAndLabels(id string, client *NodePingClient) ([]string, map[string]string, error) {
+func GetCheckIDsAndLabels(id string, client *Client) ([]string, map[string]string, error) {
 	checkIDs := map[string]string{}
 	checkLabels := []string{}
 
@@ -67,7 +67,7 @@ func GetCheckIDsAndLabels(id string, client *NodePingClient) ([]string, map[stri
 func GetUptimesForChecks(
 	checkIDs map[string]string,
 	start, end int64,
-	npClient *NodePingClient,
+	npClient *Client,
 ) map[string]float32 {
 	uptimes := map[string]float32{}
 
