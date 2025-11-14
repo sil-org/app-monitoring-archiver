@@ -6,12 +6,12 @@ go 1.25
 require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/getsentry/sentry-go v0.36.1
-	github.com/sil-org/nodeping-cli v0.0.0-20251016195808-707837e41cad
 	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.38.0
 	golang.org/x/oauth2 v0.27.0
 	google.golang.org/api v0.176.1
+	gopkg.in/resty.v1 v1.12.0
 )
 
 require (
@@ -31,7 +31,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/sil-org/nodeping-go-client v0.0.0-20250912043348-b0585b500abd // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.51.0 // indirect
@@ -44,6 +43,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240429193739-8cf5692501f6 // indirect
 	google.golang.org/grpc v1.63.2 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
-	gopkg.in/resty.v1 v1.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
