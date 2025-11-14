@@ -25,7 +25,6 @@ type ClientConfig struct {
 type Client struct {
 	Config      ClientConfig
 	httpClient  *http.Client
-	header      http.Header
 	MockResults string
 }
 
@@ -47,8 +46,6 @@ func New(config ClientConfig) (*Client, error) {
 	client.MockResults = ""
 
 	client.httpClient = &http.Client{Timeout: time.Second * 30}
-	client.header = http.Header{}
-	client.header.Set("user-agent", "sil-org/app-monitoring-archiver "+Version)
 
 	return &client, nil
 }
@@ -64,7 +61,7 @@ func (c *Client) ListChecks() ([]CheckResponse, error) {
 	if c.MockResults != "" {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 	} else {
-		if err := c.Request(path, &listObj); err != nil {
+		if err := c.request(path, &listObj); err != nil {
 			return nil, err
 		}
 	}
@@ -87,7 +84,7 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 		return check, nil
 	}
 
-	if err := c.Request(path, &check); err != nil {
+	if err := c.request(path, &check); err != nil {
 		return CheckResponse{}, err
 	}
 
@@ -122,7 +119,7 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 		return listObj, nil
 	}
 
-	if err := c.Request(path, &listObj); err != nil {
+	if err := c.request(path, &listObj); err != nil {
 		return nil, err
 	}
 
@@ -141,7 +138,7 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 		return listObj, nil
 	}
-	if err := c.Request(path, &listObj); err != nil {
+	if err := c.request(path, &listObj); err != nil {
 		return nil, err
 	}
 
@@ -215,12 +212,13 @@ func (c *Client) GetUptimesForChecks(checkIDs map[string]string, period Period) 
 	return uptimes
 }
 
-func (c *Client) Request(path string, v any) error {
+func (c *Client) request(path string, v any) error {
 	req, err := http.NewRequest("GET", c.Config.BaseURL+path, nil)
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header = c.header
+	req.Header.Set("user-agent", "sil-org/app-monitoring-archiver "+Version)
+
 	req.SetBasicAuth(c.Config.Token, "")
 
 	res, err := c.httpClient.Do(req)
