@@ -32,7 +32,7 @@ func GetMonthPosition(monthLabel string) (int, error) {
 
 	index, ok := indexes[month]
 	if !ok {
-		return 0, fmt.Errorf("Month %s not valid", monthLabel)
+		return 0, fmt.Errorf("month %s not valid", monthLabel)
 	}
 
 	return index, nil
@@ -40,7 +40,7 @@ func GetMonthPosition(monthLabel string) (int, error) {
 
 func ConvertColumnIndexToLetter(index int64) (string, error) {
 	if index > 25 {
-		return "", fmt.Errorf("Not allowed to convert index if over 25. It was %d", index)
+		return "", fmt.Errorf("not allowed to convert index if over 25. It was %d", index)
 	}
 
 	runeA := int64([]rune("A")[0])
@@ -94,7 +94,7 @@ func InsertRowOrColumn(insertRowNotColumn bool, index, sheetID int64, spreadshee
 	}
 	_, err := srv.Spreadsheets.BatchUpdate(spreadsheetID, rbb).Context(context.Background()).Do()
 	if err != nil {
-		return fmt.Errorf("Unable to insert %s %d. %s", dimension, index, err)
+		return fmt.Errorf("unable to insert %s %d. %s", dimension, index, err)
 	}
 
 	return nil
@@ -131,7 +131,7 @@ func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) error {
 func GetSheetIDFromTitle(title string, sheetsData SheetsData) (bool, int64, error) {
 	ssResp, err := sheetsData.Service.Spreadsheets.Get(sheetsData.SpreadsheetID).Do()
 	if err != nil {
-		return false, 0, fmt.Errorf("Error trying to find sheet %s. %v", title, err)
+		return false, 0, fmt.Errorf("error trying to find sheet %s: %v", title, err)
 	}
 
 	for _, next := range ssResp.Sheets {

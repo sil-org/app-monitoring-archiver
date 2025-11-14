@@ -170,7 +170,7 @@ func (c *Client) GetContactGroupIDFromName(contactGroupName string) (string, err
 
 func (c *Client) GetCheckIDsAndLabels(id string) ([]string, map[string]string, error) {
 	checkIDs := map[string]string{}
-	checkLabels := []string{}
+	var checkLabels []string
 
 	checks, err := c.ListChecks()
 	if err != nil {
