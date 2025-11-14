@@ -20,19 +20,19 @@ resource "aws_iam_policy" "cdk" {
   description = "CDK deployment policy"
 
   policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Effect = "Allow"
-          Action = [
-            "sts:AssumeRole",
-          ]
-          Resource = [
-            "arn:aws:iam::*:role/cdk-*",
-          ]
-        },
-      ]
-    })
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sts:AssumeRole",
+        ]
+        Resource = [
+          "arn:aws:iam::*:role/cdk-*",
+        ]
+      },
+    ]
+  })
 }
 
 /*

@@ -7,7 +7,6 @@ import (
 )
 
 func Test_findRowPositionAndWhetherToInsertARow(t *testing.T) {
-
 	type testCase struct {
 		name          string
 		values        [][]any
