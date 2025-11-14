@@ -79,7 +79,7 @@ func Test_findRowPositionAndWhetherToInsertARow(t *testing.T) {
 		},
 		{
 			name: "new checkName comes after others",
-			values: [][]interface{}{ // testing once with [][]interface{}, since that is what the Google library uses
+			values: [][]any{ // testing once with [][]any, since that is what the Google library uses
 				{"first"},
 				{"second"},
 			},

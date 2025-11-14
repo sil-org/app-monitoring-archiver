@@ -48,11 +48,11 @@ type CheckResponse struct {
 		Threshold int    `json:"threshold"`
 		Sens      int    `json:"sens"`
 	} `json:"parameters"`
-	Created   int64       `json:"created"`
-	Queue     interface{} `json:"queue"` // This is normally a string but can be a bool sometimes
-	UUID      string      `json:"uuid"`
-	State     int         `json:"state"`
-	Firstdown int64       `json:"firstdown"`
+	Created   int64  `json:"created"`
+	Queue     any    `json:"queue"` // This is normally a string but can be a bool sometimes
+	UUID      string `json:"uuid"`
+	State     int    `json:"state"`
+	Firstdown int64  `json:"firstdown"`
 }
 
 type UptimeResponse struct {
@@ -62,8 +62,8 @@ type UptimeResponse struct {
 }
 
 type ContactGroupResponse struct {
-	Type       string        `json:"type"`
-	CustomerID string        `json:"customer_id"`
-	Name       string        `json:"name"`
-	Members    []interface{} `json:"members"`
+	Type       string `json:"type"`
+	CustomerID string `json:"customer_id"`
+	Name       string `json:"name"`
+	Members    []any  `json:"members"`
 }
