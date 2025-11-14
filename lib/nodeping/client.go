@@ -16,9 +16,8 @@ const (
 
 // ClientConfig type includes configuration options for NodePing client.
 type ClientConfig struct {
-	BaseURL    string
-	Token      string
-	CustomerID string
+	BaseURL string
+	Token   string
 }
 
 // Client holds config and provides methods for various api calls
@@ -42,7 +41,6 @@ func New(config ClientConfig) (*Client, error) {
 		client.Config.BaseURL = config.BaseURL
 	}
 
-	client.Config.CustomerID = config.CustomerID
 	client.MockResults = ""
 
 	client.httpClient = &http.Client{Timeout: time.Second * 30}
@@ -52,10 +50,6 @@ func New(config ClientConfig) (*Client, error) {
 
 // ListChecks retrieves all the "Checks" in NodePing
 func (c *Client) ListChecks() ([]CheckResponse, error) {
-	path := "/checks"
-	if c.Config.CustomerID != "" {
-		path = fmt.Sprintf("/checks/%s", c.Config.CustomerID)
-	}
 	var listObj map[string]CheckResponse
 
 	if c.MockResults != "" {
@@ -64,7 +58,7 @@ func (c *Client) ListChecks() ([]CheckResponse, error) {
 			return nil, err
 		}
 	} else {
-		if err := c.request(path, &listObj); err != nil {
+		if err := c.request("/checks", &listObj); err != nil {
 			return nil, err
 		}
 	}
@@ -137,10 +131,6 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 
 // ListContactGroups retrieves the list of Contact Groups
 func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
-	path := "/contactgroups"
-	if c.Config.CustomerID != "" {
-		path = fmt.Sprintf("/contactgroups/%s", c.Config.CustomerID)
-	}
 	var listObj map[string]ContactGroupResponse
 
 	if c.MockResults != "" {
@@ -150,7 +140,7 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 		}
 		return listObj, nil
 	}
-	if err := c.request(path, &listObj); err != nil {
+	if err := c.request("/contactgroups", &listObj); err != nil {
 		return nil, err
 	}
 
