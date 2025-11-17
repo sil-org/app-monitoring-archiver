@@ -91,17 +91,7 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 
 // GetUptime retrieves the uptime entries for a certain check within an optional date range (by Timestamp with microseconds)
 func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse, error) {
-	q := url.Values{}
-
-	if !period.From.IsZero() {
-		q.Set("start", strconv.FormatInt(period.From.Unix()*1000, 10))
-	}
-
-	if !period.To.IsZero() {
-		q.Set("end", strconv.FormatInt(period.To.Unix()*1000, 10))
-	}
-
-	path := "/results/uptime/" + id + q.Encode()
+	path := GetUptimePath(id, period)
 
 	var listObj map[string]UptimeResponse
 
@@ -266,4 +256,19 @@ func GetUptimesForContactGroup(token, group string, period Period) (UptimeResult
 	}
 
 	return results, nil
+}
+
+// GetUptimePath assembles the path to use for a GetUptime request.
+func GetUptimePath(id string, period Period) string {
+	q := url.Values{}
+
+	if !period.From.IsZero() {
+		q.Set("start", strconv.FormatInt(period.From.Unix()*1000, 10))
+	}
+
+	if !period.To.IsZero() {
+		q.Set("end", strconv.FormatInt(period.To.Unix()*1000, 10))
+	}
+
+	return fmt.Sprintf("/results/uptime/%s?%s", id, q.Encode())
 }
