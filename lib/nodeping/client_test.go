@@ -23,7 +23,7 @@ func TestNew(t *testing.T) {
 		t.FailNow()
 	}
 
-	assert.Equal(t, BaseURL, client.Config.BaseURL)
+	assert.Equal(t, DefaultBaseURL, client.Config.BaseURL)
 	assert.Equal(t, "abc123", client.Config.Token)
 	assert.Equal(t, "", client.MockResults)
 }
@@ -277,10 +277,9 @@ func TestGetResultUptimeWithParams(t *testing.T) {
 		return
 	}
 
-	// Dec 1, 2010 - Dec 1, 2030
 	period := Period{
-		From: time.Unix(int64(1291161600), 0),
-		To:   time.Unix(int64(1922313600), 0),
+		From: time.Date(2010, 12, 1, 0, 0, 0, 0, time.UTC),
+		To:   time.Date(2030, 12, 1, 0, 0, 0, 0, time.UTC),
 	}
 	uptimes, err := client.GetUptime(checks[0].ID, period)
 	if err != nil {
