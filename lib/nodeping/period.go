@@ -32,18 +32,7 @@ func GetPeriod(v string) (*Period, error) {
 	return &period, nil
 }
 
-// GetValidPeriods returns a list of valid periods
-func GetValidPeriods() []string {
-	keys := make([]string, 0, len(validPeriods))
-	for k := range validPeriods {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-	return keys
-}
-
-// String formats the period into a human readable string
+// String formats the period into a human-readable string
 func (p *Period) String() string {
 	return fmt.Sprintf("Period: %s. From: %s      To: %s", p.name, p.From, p.To)
 }
@@ -71,7 +60,7 @@ func (p *Period) Type() string {
 	return "period"
 }
 
-// GetLastMonthPeriod - Get Period for "ThisMonth"
+// GetThisMonthPeriod - Get Period for "ThisMonth"
 func GetThisMonthPeriod(now time.Time) Period {
 	return Period{
 		From: time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC),

@@ -58,5 +58,8 @@ func init() {
 }
 
 func runArchive() {
-	googlesheets.ArchiveResultsForMonth(contactGroupName, "LastMonth", spreadsheetID, nodePingToken, countLimit)
+	err := googlesheets.ArchiveResultsForMonth(contactGroupName, "LastMonth", spreadsheetID, nodePingToken, countLimit)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }

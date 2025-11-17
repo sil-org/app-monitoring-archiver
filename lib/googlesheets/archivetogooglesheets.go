@@ -57,7 +57,7 @@ func EnsureSheetExists(sheetName string, sheetsData SheetsData) (int64, error) {
 	}
 
 	if !doesSheetExist {
-		return 0, fmt.Errorf("unable to find newly created sheet %s.", sheetName)
+		return 0, fmt.Errorf("unable to find newly created sheet %s", sheetName)
 	}
 
 	return sheetID, nil
@@ -249,7 +249,7 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 	}
 
 	index := 1
-	const delaySeconds = time.Second * 22
+	const delay = time.Second * 22
 
 	for nodePingCheck, percentage := range uptimeResults.Uptimes {
 		if index > countLimit {
@@ -258,8 +258,8 @@ func ArchiveResultsForMonth(contactGroupName, period, spreadsheetID, nodePingTok
 
 		// The quota is 100 writes per 100 seconds per user
 		if index%20 == 0 {
-			fmt.Printf("Waiting %v seconds at index %d to avoid Google Api rate limiting.\n", delaySeconds.Seconds(), index)
-			time.Sleep(delaySeconds)
+			fmt.Printf("Waiting %v seconds at index %d to avoid Google Api rate limiting.\n", delay.Seconds(), index)
+			time.Sleep(delay)
 		}
 
 		checkRow, err := EnsureCheckRowExists(nodePingCheck, year, sheetsData)

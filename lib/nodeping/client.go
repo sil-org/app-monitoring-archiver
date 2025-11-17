@@ -18,9 +18,8 @@ const (
 
 // ClientConfig type includes configuration options for NodePing client.
 type ClientConfig struct {
-	BaseURL    string
-	Token      string
-	CustomerID string
+	BaseURL string
+	Token   string
 }
 
 // Client holds config and provides methods for various api calls
@@ -50,16 +49,15 @@ func New(config ClientConfig) (*Client, error) {
 
 // ListChecks retrieves all the "Checks" in NodePing
 func (c *Client) ListChecks() ([]CheckResponse, error) {
-	path := "/checks"
-	if c.Config.CustomerID != "" {
-		path = fmt.Sprintf("/checks/%s", c.Config.CustomerID)
-	}
 	var listObj map[string]CheckResponse
 
 	if c.MockResults != "" {
-		json.Unmarshal([]byte(c.MockResults), &listObj)
+		err := json.Unmarshal([]byte(c.MockResults), &listObj)
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		if err := c.sendGetRequest(path, &listObj); err != nil {
+		if err := c.sendGetRequest("/checks", &listObj); err != nil {
 			return nil, err
 		}
 	}
@@ -78,7 +76,10 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 	var check CheckResponse
 
 	if c.MockResults != "" {
-		json.Unmarshal([]byte(c.MockResults), &check)
+		err := json.Unmarshal([]byte(c.MockResults), &check)
+		if err != nil {
+			return CheckResponse{}, err
+		}
 		return check, nil
 	}
 
@@ -96,7 +97,10 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 	var listObj map[string]UptimeResponse
 
 	if c.MockResults != "" {
-		json.Unmarshal([]byte(c.MockResults), &listObj)
+		err := json.Unmarshal([]byte(c.MockResults), &listObj)
+		if err != nil {
+			return nil, err
+		}
 		return listObj, nil
 	}
 
@@ -109,17 +113,16 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 
 // ListContactGroups retrieves the list of Contact Groups
 func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
-	path := "/contactgroups"
-	if c.Config.CustomerID != "" {
-		path = fmt.Sprintf("/contactgroups/%s", c.Config.CustomerID)
-	}
 	var listObj map[string]ContactGroupResponse
 
 	if c.MockResults != "" {
-		json.Unmarshal([]byte(c.MockResults), &listObj)
+		err := json.Unmarshal([]byte(c.MockResults), &listObj)
+		if err != nil {
+			return nil, err
+		}
 		return listObj, nil
 	}
-	if err := c.sendGetRequest(path, &listObj); err != nil {
+	if err := c.sendGetRequest("/contactgroups", &listObj); err != nil {
 		return nil, err
 	}
 
@@ -149,7 +152,7 @@ func (c *Client) GetContactGroupIDFromName(contactGroupName string) (string, err
 
 func (c *Client) GetCheckIDsAndLabels(id string) ([]string, map[string]string, error) {
 	checkIDs := map[string]string{}
-	checkLabels := []string{}
+	var checkLabels []string
 
 	checks, err := c.ListChecks()
 	if err != nil {
