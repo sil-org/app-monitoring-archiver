@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -282,7 +283,7 @@ func TestGetResultUptime(t *testing.T) {
 		return
 	}
 
-	uptimes, err := client.GetUptime(checks[0].ID, 0, 0)
+	uptimes, err := client.GetUptime(checks[0].ID, Period{})
 	if err != nil {
 		t.Error(err)
 		return
@@ -316,9 +317,11 @@ func TestGetResultUptimeWithParams(t *testing.T) {
 		return
 	}
 
-	start := int64(1291161600000) // Dec 1, 2010
-	end := int64(1922313600000)   // Dec 1, 2030
-	uptimes, err := client.GetUptime(checks[0].ID, start, end)
+	period := Period{
+		From: time.Date(2010, 12, 1, 0, 0, 0, 0, time.UTC),
+		To:   time.Date(2030, 12, 1, 0, 0, 0, 0, time.UTC),
+	}
+	uptimes, err := client.GetUptime(checks[0].ID, period)
 	if err != nil {
 		t.Error(err)
 		return
@@ -349,7 +352,7 @@ func TestGetResultUptimeMock(t *testing.T) {
 }
 `
 
-	uptimes, err := client.GetUptime("2018090614528ABCD", 0, 0)
+	uptimes, err := client.GetUptime("2018090614528ABCD", Period{})
 	if err != nil {
 		t.Error(err)
 		return
@@ -489,7 +492,7 @@ func TestGetUptimesForChecks(t *testing.T) {
 		"check1": "c1ID",
 		"check2": "c2ID",
 	}
-	uptimes := npClient.GetUptimesForChecks(checkIDs, 0, 0)
+	uptimes := npClient.GetUptimesForChecks(checkIDs, Period{})
 	expected := map[string]float32{
 		"c1ID": 99.011,
 		"c2ID": 99.011,

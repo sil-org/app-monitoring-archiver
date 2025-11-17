@@ -95,21 +95,21 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 }
 
 // GetUptime retrieves the uptime entries for a certain check within an optional date range (by Timestamp with microseconds)
-func (c *Client) GetUptime(id string, start, end int64) (map[string]UptimeResponse, error) {
+func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse, error) {
 	// Build path with potentially a "?" and "&" symbols
 	// I'm not getting c.R's built in query param functions to work properly
 	pathDelimiter := ""
 	queryParams := ""
 	queryParamDelimiter := ""
 
-	if start > 0 {
-		queryParams = fmt.Sprintf("start=%d", start)
+	if !period.From.IsZero() {
+		queryParams = fmt.Sprintf("start=%d", period.From.Unix()*1000)
 		queryParamDelimiter = "&"
 		pathDelimiter = "?"
 	}
 
-	if end > 0 {
-		queryParams = fmt.Sprintf("%s%send=%d", queryParams, queryParamDelimiter, end)
+	if !period.To.IsZero() {
+		queryParams = fmt.Sprintf("%s%send=%d", queryParams, queryParamDelimiter, period.To.Unix()*1000)
 		pathDelimiter = "?"
 	}
 
@@ -215,11 +215,11 @@ func (c *Client) GetCheckIDsAndLabels(id string) ([]string, map[string]string, e
 	return checkLabels, checkIDs, nil
 }
 
-func (c *Client) GetUptimesForChecks(checkIDs map[string]string, start, end int64) map[string]float32 {
+func (c *Client) GetUptimesForChecks(checkIDs map[string]string, period Period) map[string]float32 {
 	uptimes := map[string]float32{}
 
 	for _, checkID := range checkIDs {
-		nextUptime, err := c.GetUptime(checkID, start, end)
+		nextUptime, err := c.GetUptime(checkID, period)
 		if err != nil {
 			fmt.Printf("Error getting uptime for check ID %s.\n%s\n", checkID, err.Error())
 			continue
@@ -247,10 +247,7 @@ func GetUptimesForContactGroup(token, group string, period Period) (UptimeResult
 		return emptyResults, err
 	}
 
-	start := period.From.Unix() * 1000
-	end := period.To.Unix() * 1000
-
-	uptimes := npClient.GetUptimesForChecks(checkIDs, start, end)
+	uptimes := npClient.GetUptimesForChecks(checkIDs, period)
 	uptimesByLabel := map[string]float32{}
 
 	for _, label := range checkLabels {
@@ -260,8 +257,8 @@ func GetUptimesForContactGroup(token, group string, period Period) (UptimeResult
 	results := UptimeResults{
 		CheckLabels: checkLabels,
 		Uptimes:     uptimesByLabel,
-		StartTime:   start / 1000,
-		EndTime:     end / 1000,
+		StartTime:   period.From.Unix(),
+		EndTime:     period.To.Unix(),
 	}
 
 	return results, nil

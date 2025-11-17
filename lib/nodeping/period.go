@@ -51,7 +51,7 @@ func (p *Period) String() string {
 // Set is used by Cobra to set the variable. This checks against the valid periods
 // and outputs an error message if invalid, otherwise it sets the period to the
 // corresponding valid reference.
-func (e *Period) Set(v string) error {
+func (p *Period) Set(v string) error {
 	f, ok := validPeriods[v]
 	if !ok {
 		keys := make([]string, 0, len(validPeriods))
@@ -62,12 +62,12 @@ func (e *Period) Set(v string) error {
 		return fmt.Errorf(`must be one of "%s"`, strings.Join(keys, `", "`))
 	}
 
-	*e = f(time.Now().UTC())
+	*p = f(time.Now().UTC())
 	return nil
 }
 
 // Type is used by cobra as a helper method
-func (e *Period) Type() string {
+func (p *Period) Type() string {
 	return "period"
 }
 
