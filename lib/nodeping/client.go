@@ -101,7 +101,7 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 		q.Set("end", strconv.FormatInt(period.To.Unix()*1000, 10))
 	}
 
-	path := "/results/uptime/" + q.Encode()
+	path := "/results/uptime/" + id + q.Encode()
 
 	var listObj map[string]UptimeResponse
 
