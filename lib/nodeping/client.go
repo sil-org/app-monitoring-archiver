@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -89,24 +91,17 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 
 // GetUptime retrieves the uptime entries for a certain check within an optional date range (by Timestamp with microseconds)
 func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse, error) {
-	// Build path with potentially a "?" and "&" symbols
-	// I'm not getting c.R's built in query param functions to work properly
-	pathDelimiter := ""
-	queryParams := ""
-	queryParamDelimiter := ""
+	q := url.Values{}
 
 	if !period.From.IsZero() {
-		queryParams = fmt.Sprintf("start=%d", period.From.Unix()*1000)
-		queryParamDelimiter = "&"
-		pathDelimiter = "?"
+		q.Set("start", strconv.FormatInt(period.From.Unix()*1000, 10))
 	}
 
 	if !period.To.IsZero() {
-		queryParams = fmt.Sprintf("%s%send=%d", queryParams, queryParamDelimiter, period.To.Unix()*1000)
-		pathDelimiter = "?"
+		q.Set("end", strconv.FormatInt(period.To.Unix()*1000, 10))
 	}
 
-	path := fmt.Sprintf("/results/uptime/%s%s%s", id, pathDelimiter, queryParams)
+	path := "/results/uptime/" + q.Encode()
 
 	var listObj map[string]UptimeResponse
 
