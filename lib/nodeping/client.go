@@ -24,8 +24,9 @@ type ClientConfig struct {
 // Client holds config and provides methods for various api calls
 type Client struct {
 	Config      ClientConfig
-	httpClient  *http.Client
 	MockResults string
+
+	httpClient *http.Client
 }
 
 // New creates a new Client
@@ -56,7 +57,7 @@ func (c *Client) ListChecks() ([]CheckResponse, error) {
 	if c.MockResults != "" {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 	} else {
-		if err := c.request(path, &listObj); err != nil {
+		if err := c.sendGetRequest(path, &listObj); err != nil {
 			return nil, err
 		}
 	}
@@ -79,7 +80,7 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 		return check, nil
 	}
 
-	if err := c.request(path, &check); err != nil {
+	if err := c.sendGetRequest(path, &check); err != nil {
 		return CheckResponse{}, err
 	}
 
@@ -114,7 +115,7 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 		return listObj, nil
 	}
 
-	if err := c.request(path, &listObj); err != nil {
+	if err := c.sendGetRequest(path, &listObj); err != nil {
 		return nil, err
 	}
 
@@ -133,7 +134,7 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 		return listObj, nil
 	}
-	if err := c.request(path, &listObj); err != nil {
+	if err := c.sendGetRequest(path, &listObj); err != nil {
 		return nil, err
 	}
 
@@ -207,8 +208,8 @@ func (c *Client) GetUptimesForChecks(checkIDs map[string]string, period Period) 
 	return uptimes
 }
 
-func (c *Client) request(path string, v any) error {
-	req, err := http.NewRequest("GET", c.Config.BaseURL+path, nil)
+func (c *Client) sendGetRequest(path string, v any) error {
+	req, err := http.NewRequest(http.MethodGet, c.Config.BaseURL+path, nil)
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
 	}
@@ -227,7 +228,7 @@ func (c *Client) request(path string, v any) error {
 		return fmt.Errorf("error reading response body: %w", err)
 	}
 
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code %d, body: %s", res.StatusCode, body[0:min(250, len(body))])
 	}
 
