@@ -57,7 +57,7 @@ func WriteToCellWithColumnLetter(rowIndex int64, columnLetter, newValue, sheetNa
 
 	_, err := srv.Spreadsheets.Values.Update(spreadsheetID, cellRange, valueRange).ValueInputOption("RAW").Do()
 	if err != nil {
-		return fmt.Errorf("unable to write to cell '%s': %w", cellRange, err)
+		return fmt.Errorf("unable to write to cell %q: %w", cellRange, err)
 	}
 
 	return nil
@@ -94,7 +94,7 @@ func InsertRowOrColumn(insertRowNotColumn bool, index, sheetID int64, spreadshee
 	}
 	_, err := srv.Spreadsheets.BatchUpdate(spreadsheetID, rbb).Context(context.Background()).Do()
 	if err != nil {
-		return fmt.Errorf("unable to insert %s %d. %s", dimension, index, err)
+		return fmt.Errorf("unable to insert %s %d: %w", dimension, index, err)
 	}
 
 	return nil
@@ -131,7 +131,7 @@ func AddColumn(sheetID int64, spreadsheetID string, srv *sheets.Service) error {
 func GetSheetIDFromTitle(title string, sheetsData SheetsData) (bool, int64, error) {
 	ssResp, err := sheetsData.Service.Spreadsheets.Get(sheetsData.SpreadsheetID).Do()
 	if err != nil {
-		return false, 0, fmt.Errorf("error trying to find sheet %s: %v", title, err)
+		return false, 0, fmt.Errorf("error trying to find sheet %s: %w", title, err)
 	}
 
 	for _, next := range ssResp.Sheets {
