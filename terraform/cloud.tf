@@ -1,4 +1,3 @@
-
 terraform {
   cloud {
     organization = "gtis"
@@ -8,4 +7,3 @@ terraform {
     }
   }
 }
-
