@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"sort"
+	"strconv"
 	"time"
 )
 
 const (
-	BaseURL = "https://api.nodeping.com/api/1"
-	Version = "0.0.1"
+	DefaultBaseURL = "https://api.nodeping.com/api/1"
+	Version        = "0.0.1"
 )
 
 // ClientConfig type includes configuration options for NodePing client.
@@ -23,25 +25,22 @@ type ClientConfig struct {
 // Client holds config and provides methods for various api calls
 type Client struct {
 	Config      ClientConfig
-	httpClient  *http.Client
 	MockResults string
+
+	httpClient *http.Client
 }
 
 // New creates a new Client
 func New(config ClientConfig) (*Client, error) {
-	var client Client
+	client := Client{Config: config}
 
 	if config.Token == "" {
-		return &Client{}, fmt.Errorf("token is required in ClientConfig")
-	}
-	client.Config.Token = config.Token
-
-	client.Config.BaseURL = BaseURL
-	if config.BaseURL != "" {
-		client.Config.BaseURL = config.BaseURL
+		return nil, fmt.Errorf("token is required in ClientConfig")
 	}
 
-	client.MockResults = ""
+	if config.BaseURL == "" {
+		client.Config.BaseURL = DefaultBaseURL
+	}
 
 	client.httpClient = &http.Client{Timeout: time.Second * 30}
 
@@ -58,7 +57,7 @@ func (c *Client) ListChecks() ([]CheckResponse, error) {
 			return nil, err
 		}
 	} else {
-		if err := c.request("/checks", &listObj); err != nil {
+		if err := c.sendGetRequest("/checks", &listObj); err != nil {
 			return nil, err
 		}
 	}
@@ -84,7 +83,7 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 		return check, nil
 	}
 
-	if err := c.request(path, &check); err != nil {
+	if err := c.sendGetRequest(path, &check); err != nil {
 		return CheckResponse{}, err
 	}
 
@@ -93,24 +92,7 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 
 // GetUptime retrieves the uptime entries for a certain check within an optional date range (by Timestamp with microseconds)
 func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse, error) {
-	// Build path with potentially a "?" and "&" symbols
-	// I'm not getting c.R's built in query param functions to work properly
-	pathDelimiter := ""
-	queryParams := ""
-	queryParamDelimiter := ""
-
-	if !period.From.IsZero() {
-		queryParams = fmt.Sprintf("start=%d", period.From.Unix()*1000)
-		queryParamDelimiter = "&"
-		pathDelimiter = "?"
-	}
-
-	if !period.To.IsZero() {
-		queryParams = fmt.Sprintf("%s%send=%d", queryParams, queryParamDelimiter, period.To.Unix()*1000)
-		pathDelimiter = "?"
-	}
-
-	path := fmt.Sprintf("/results/uptime/%s%s%s", id, pathDelimiter, queryParams)
+	path := GetUptimePath(id, period)
 
 	var listObj map[string]UptimeResponse
 
@@ -122,7 +104,7 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 		return listObj, nil
 	}
 
-	if err := c.request(path, &listObj); err != nil {
+	if err := c.sendGetRequest(path, &listObj); err != nil {
 		return nil, err
 	}
 
@@ -140,7 +122,7 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 		}
 		return listObj, nil
 	}
-	if err := c.request("/contactgroups", &listObj); err != nil {
+	if err := c.sendGetRequest("/contactgroups", &listObj); err != nil {
 		return nil, err
 	}
 
@@ -214,8 +196,8 @@ func (c *Client) GetUptimesForChecks(checkIDs map[string]string, period Period) 
 	return uptimes
 }
 
-func (c *Client) request(path string, v any) error {
-	req, err := http.NewRequest("GET", c.Config.BaseURL+path, nil)
+func (c *Client) sendGetRequest(path string, v any) error {
+	req, err := http.NewRequest(http.MethodGet, c.Config.BaseURL+path, nil)
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
 	}
@@ -234,7 +216,7 @@ func (c *Client) request(path string, v any) error {
 		return fmt.Errorf("error reading response body: %w", err)
 	}
 
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code %d, body: %s", res.StatusCode, body[0:min(250, len(body))])
 	}
 
@@ -277,4 +259,19 @@ func GetUptimesForContactGroup(token, group string, period Period) (UptimeResult
 	}
 
 	return results, nil
+}
+
+// GetUptimePath assembles the path to use for a GetUptime request.
+func GetUptimePath(id string, period Period) string {
+	q := url.Values{}
+
+	if !period.From.IsZero() {
+		q.Set("start", strconv.FormatInt(period.From.Unix()*1000, 10))
+	}
+
+	if !period.To.IsZero() {
+		q.Set("end", strconv.FormatInt(period.To.Unix()*1000, 10))
+	}
+
+	return fmt.Sprintf("/results/uptime/%s?%s", id, q.Encode())
 }

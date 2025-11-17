@@ -23,7 +23,7 @@ func TestNew(t *testing.T) {
 		t.FailNow()
 	}
 
-	assert.Equal(t, BaseURL, client.Config.BaseURL)
+	assert.Equal(t, DefaultBaseURL, client.Config.BaseURL)
 	assert.Equal(t, "abc123", client.Config.Token)
 	assert.Equal(t, "", client.MockResults)
 }
@@ -277,10 +277,9 @@ func TestGetResultUptimeWithParams(t *testing.T) {
 		return
 	}
 
-	// Dec 1, 2010 - Dec 1, 2030
 	period := Period{
-		From: time.Unix(int64(1291161600), 0),
-		To:   time.Unix(int64(1922313600), 0),
+		From: time.Date(2010, 12, 1, 0, 0, 0, 0, time.UTC),
+		To:   time.Date(2030, 12, 1, 0, 0, 0, 0, time.UTC),
 	}
 	uptimes, err := client.GetUptime(checks[0].ID, period)
 	if err != nil {
@@ -453,5 +452,42 @@ func TestGetUptimesForChecks(t *testing.T) {
 
 	if len(uptimes) != 2 || uptimes["c1ID"] != expected["c1ID"] || uptimes["c2ID"] != expected["c2ID"] {
 		t.Errorf("Got wrong uptime results. \nExpected %+v\n  but got %+v", expected, uptimes)
+	}
+}
+
+func TestGetUptimePath(t *testing.T) {
+	jan1 := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	jan31 := time.Date(2020, 1, 31, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name   string
+		id     string
+		period Period
+		want   string
+	}{
+		{
+			name:   "from and to",
+			id:     "1",
+			period: Period{From: jan1, To: jan31},
+			want:   "/results/uptime/1?end=1580428800000&start=1577836800000",
+		},
+		{
+			name:   "from only",
+			id:     "1",
+			period: Period{From: jan1},
+			want:   "/results/uptime/1?start=1577836800000",
+		},
+		{
+			name:   "to only",
+			id:     "1",
+			period: Period{To: jan31},
+			want:   "/results/uptime/1?end=1580428800000",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GetUptimePath(tt.id, tt.period)
+			assert.Equalf(t, tt.want, got, "GetUptime(%v, %v)", tt.id, tt.period)
+		})
 	}
 }
