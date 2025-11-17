@@ -42,9 +42,6 @@ func TestListChecks(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-	}
 }
 
 func TestListChecksMock(t *testing.T) {
@@ -110,10 +107,6 @@ func TestListChecksMock(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	checkCount := len(checks)
 	expectedCount := 4
@@ -144,18 +137,10 @@ func TestGetCheck(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	check, err := client.GetCheck(checks[0].ID)
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -191,10 +176,6 @@ func TestGetCheckMock(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	expected := "Example1"
 	if check.Label != expected {
@@ -218,10 +199,6 @@ func TestListContactGroups(t *testing.T) {
 	}
 
 	t.Logf("CGs: %+v", cgs)
-
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-	}
 }
 
 func TestListContactGroupsMock(t *testing.T) {
@@ -243,11 +220,6 @@ func TestListContactGroupsMock(t *testing.T) {
 	cgs, err := client.ListContactGroups()
 	if err != nil {
 		t.Error(err)
-		return
-	}
-
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -278,18 +250,10 @@ func TestGetResultUptime(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	uptimes, err := client.GetUptime(checks[0].ID, Period{})
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -312,10 +276,6 @@ func TestGetResultUptimeWithParams(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
-		return
-	}
 
 	period := Period{
 		From: time.Date(2010, 12, 1, 0, 0, 0, 0, time.UTC),
@@ -324,10 +284,6 @@ func TestGetResultUptimeWithParams(t *testing.T) {
 	uptimes, err := client.GetUptime(checks[0].ID, period)
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -355,10 +311,6 @@ func TestGetResultUptimeMock(t *testing.T) {
 	uptimes, err := client.GetUptime("2018090614528ABCD", Period{})
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if client.Error.Error != "" {
-		t.Error(client.Error)
 		return
 	}
 
@@ -500,5 +452,42 @@ func TestGetUptimesForChecks(t *testing.T) {
 
 	if len(uptimes) != 2 || uptimes["c1ID"] != expected["c1ID"] || uptimes["c2ID"] != expected["c2ID"] {
 		t.Errorf("Got wrong uptime results. \nExpected %+v\n  but got %+v", expected, uptimes)
+	}
+}
+
+func TestGetUptimePath(t *testing.T) {
+	jan1 := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	jan31 := time.Date(2020, 1, 31, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name   string
+		id     string
+		period Period
+		want   string
+	}{
+		{
+			name:   "from and to",
+			id:     "1",
+			period: Period{From: jan1, To: jan31},
+			want:   "/results/uptime/1?end=1580428800000&start=1577836800000",
+		},
+		{
+			name:   "from only",
+			id:     "1",
+			period: Period{From: jan1},
+			want:   "/results/uptime/1?start=1577836800000",
+		},
+		{
+			name:   "to only",
+			id:     "1",
+			period: Period{To: jan31},
+			want:   "/results/uptime/1?end=1580428800000",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GetUptimePath(tt.id, tt.period)
+			assert.Equalf(t, tt.want, got, "GetUptime(%v, %v)", tt.id, tt.period)
+		})
 	}
 }

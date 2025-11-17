@@ -3,9 +3,12 @@ package nodeping
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"sort"
-
-	"gopkg.in/resty.v1"
+	"strconv"
+	"time"
 )
 
 const (
@@ -23,9 +26,9 @@ type ClientConfig struct {
 // Client holds config and provides methods for various api calls
 type Client struct {
 	Config      ClientConfig
-	Error       NodePingError
-	R           *resty.Request
 	MockResults string
+
+	httpClient *http.Client
 }
 
 // New creates a new Client
@@ -40,11 +43,7 @@ func New(config ClientConfig) (*Client, error) {
 		client.Config.BaseURL = DefaultBaseURL
 	}
 
-	resty.SetHostURL(client.Config.BaseURL)
-	resty.SetBasicAuth(client.Config.Token, "")
-	resty.SetHeader("user-agent", "sil-org/app-monitoring-archiver "+Version)
-	client.R = resty.R()
-	client.R.SetError(&client.Error)
+	client.httpClient = &http.Client{Timeout: time.Second * 30}
 
 	return &client, nil
 }
@@ -60,10 +59,8 @@ func (c *Client) ListChecks() ([]CheckResponse, error) {
 	if c.MockResults != "" {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 	} else {
-		_, err := c.R.SetResult(&listObj).Get(path)
-		errChk := c.CheckForError(err)
-		if errChk != nil {
-			return []CheckResponse{}, errChk
+		if err := c.sendGetRequest(path, &listObj); err != nil {
+			return nil, err
 		}
 	}
 
@@ -85,10 +82,8 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 		return check, nil
 	}
 
-	_, err := c.R.SetResult(&check).Get(path)
-	errChk := c.CheckForError(err)
-	if errChk != nil {
-		return CheckResponse{}, errChk
+	if err := c.sendGetRequest(path, &check); err != nil {
+		return CheckResponse{}, err
 	}
 
 	return check, nil
@@ -96,24 +91,7 @@ func (c *Client) GetCheck(id string) (CheckResponse, error) {
 
 // GetUptime retrieves the uptime entries for a certain check within an optional date range (by Timestamp with microseconds)
 func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse, error) {
-	// Build path with potentially a "?" and "&" symbols
-	// I'm not getting c.R's built in query param functions to work properly
-	pathDelimiter := ""
-	queryParams := ""
-	queryParamDelimiter := ""
-
-	if !period.From.IsZero() {
-		queryParams = fmt.Sprintf("start=%d", period.From.Unix()*1000)
-		queryParamDelimiter = "&"
-		pathDelimiter = "?"
-	}
-
-	if !period.To.IsZero() {
-		queryParams = fmt.Sprintf("%s%send=%d", queryParams, queryParamDelimiter, period.To.Unix()*1000)
-		pathDelimiter = "?"
-	}
-
-	path := fmt.Sprintf("/results/uptime/%s%s%s", id, pathDelimiter, queryParams)
+	path := GetUptimePath(id, period)
 
 	var listObj map[string]UptimeResponse
 
@@ -122,10 +100,8 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 		return listObj, nil
 	}
 
-	_, err := c.R.SetResult(&listObj).Get(path)
-	errChk := c.CheckForError(err)
-	if errChk != nil {
-		return map[string]UptimeResponse{}, errChk
+	if err := c.sendGetRequest(path, &listObj); err != nil {
+		return nil, err
 	}
 
 	return listObj, nil
@@ -135,7 +111,7 @@ func (c *Client) GetUptime(id string, period Period) (map[string]UptimeResponse,
 func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 	path := "/contactgroups"
 	if c.Config.CustomerID != "" {
-		path = fmt.Sprintf("/checks/%s", c.Config.CustomerID)
+		path = fmt.Sprintf("/contactgroups/%s", c.Config.CustomerID)
 	}
 	var listObj map[string]ContactGroupResponse
 
@@ -143,24 +119,11 @@ func (c *Client) ListContactGroups() (map[string]ContactGroupResponse, error) {
 		json.Unmarshal([]byte(c.MockResults), &listObj)
 		return listObj, nil
 	}
-
-	_, err := c.R.SetResult(&listObj).Get(path)
-	errChk := c.CheckForError(err)
-	if errChk != nil {
-		return map[string]ContactGroupResponse{}, errChk
+	if err := c.sendGetRequest(path, &listObj); err != nil {
+		return nil, err
 	}
 
 	return listObj, nil
-}
-
-func (c *Client) CheckForError(err error) error {
-	if err != nil {
-		return err
-	}
-	if c.Error.Error != "" {
-		return fmt.Errorf("%s", c.Error.Error)
-	}
-	return nil
 }
 
 func (c *Client) GetContactGroupIDFromName(contactGroupName string) (string, error) {
@@ -230,6 +193,37 @@ func (c *Client) GetUptimesForChecks(checkIDs map[string]string, period Period) 
 	return uptimes
 }
 
+func (c *Client) sendGetRequest(path string, v any) error {
+	req, err := http.NewRequest(http.MethodGet, c.Config.BaseURL+path, nil)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
+	req.Header.Set("user-agent", "sil-org/app-monitoring-archiver "+Version)
+
+	req.SetBasicAuth(c.Config.Token, "")
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("error sending request: %w", err)
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code %d, body: %s", res.StatusCode, body[0:min(250, len(body))])
+	}
+
+	err = json.Unmarshal(body, &v)
+	if err != nil {
+		return fmt.Errorf("invalid response body %s: %w", body, err)
+	}
+	return nil
+}
+
 func GetUptimesForContactGroup(token, group string, period Period) (UptimeResults, error) {
 	var emptyResults UptimeResults
 	npClient, err := New(ClientConfig{Token: token})
@@ -262,4 +256,19 @@ func GetUptimesForContactGroup(token, group string, period Period) (UptimeResult
 	}
 
 	return results, nil
+}
+
+// GetUptimePath assembles the path to use for a GetUptime request.
+func GetUptimePath(id string, period Period) string {
+	q := url.Values{}
+
+	if !period.From.IsZero() {
+		q.Set("start", strconv.FormatInt(period.From.Unix()*1000, 10))
+	}
+
+	if !period.To.IsZero() {
+		q.Set("end", strconv.FormatInt(period.To.Unix()*1000, 10))
+	}
+
+	return fmt.Sprintf("/results/uptime/%s?%s", id, q.Encode())
 }

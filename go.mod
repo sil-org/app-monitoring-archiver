@@ -11,7 +11,6 @@ require (
 	golang.org/x/net v0.38.0
 	golang.org/x/oauth2 v0.27.0
 	google.golang.org/api v0.176.1
-	gopkg.in/resty.v1 v1.12.0
 )
 
 require (
