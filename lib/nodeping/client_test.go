@@ -22,7 +22,7 @@ func TestNew(t *testing.T) {
 		t.FailNow()
 	}
 
-	assert.Equal(t, BaseURL, client.Config.BaseURL)
+	assert.Equal(t, DefaultBaseURL, client.Config.BaseURL)
 	assert.Equal(t, "abc123", client.Config.Token)
 	assert.Equal(t, "", client.MockResults)
 }

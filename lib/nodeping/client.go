@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	BaseURL = "https://api.nodeping.com/api/1"
-	Version = "0.0.1"
+	DefaultBaseURL = "https://api.nodeping.com/api/1"
+	Version        = "0.0.1"
 )
 
 // ClientConfig type includes configuration options for NodePing client.
@@ -30,20 +30,15 @@ type Client struct {
 
 // New creates a new Client
 func New(config ClientConfig) (*Client, error) {
-	var client Client
+	client := Client{Config: config}
 
 	if config.Token == "" {
-		return &Client{}, fmt.Errorf("token is required in ClientConfig")
-	}
-	client.Config.Token = config.Token
-
-	client.Config.BaseURL = BaseURL
-	if config.BaseURL != "" {
-		client.Config.BaseURL = config.BaseURL
+		return nil, fmt.Errorf("token is required in ClientConfig")
 	}
 
-	client.Config.CustomerID = config.CustomerID
-	client.MockResults = ""
+	if config.BaseURL == "" {
+		client.Config.BaseURL = DefaultBaseURL
+	}
 
 	resty.SetHostURL(client.Config.BaseURL)
 	resty.SetBasicAuth(client.Config.Token, "")
