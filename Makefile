@@ -13,3 +13,7 @@ deploy:
 clean:
 	docker compose kill
 	docker compose rm -f
+
+update:
+	go get -u ./... && go mod tidy
+	cd cdk && go get -u ./... && go mod tidy && cd ..
