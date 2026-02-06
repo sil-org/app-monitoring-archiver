@@ -17,10 +17,8 @@ resource "aws_iam_role" "hcp" {
           StringEquals = {
             "app.terraform.io:aud" = "aws.workload.identity"
           }
-          "ForAnyValue:StringLike" = {
-            "app.terraform.io:sub" = [
-              "organization:gtis:project:*:workspace:app-monitoring-archiver:run_phase:*",
-            ]
+          StringLike = {
+            "app.terraform.io:sub" = "organization:gtis:project:*:workspace:app-monitoring-archiver:run_phase:*"
           }
         }
       }
