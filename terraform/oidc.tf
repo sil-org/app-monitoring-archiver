@@ -44,13 +44,6 @@ resource "aws_iam_role_policy" "hcp" {
           "iam:DeleteAccessKey",
           "iam:GetAccessKeyLastUsed",
           "iam:ListAccessKeys",
-          "iam:CreatePolicy",
-          "iam:DeletePolicy",
-          "iam:GetPolicy",
-          "iam:GetPolicyVersion",
-          "iam:ListPolicyVersions",
-          "iam:CreatePolicyVersion",
-          "iam:DeletePolicyVersion",
           "iam:AttachUserPolicy",
           "iam:DetachUserPolicy",
           "iam:ListAttachedUserPolicies",
@@ -58,7 +51,21 @@ resource "aws_iam_role_policy" "hcp" {
         ]
         Effect   = "Allow"
         Resource = "arn:aws:iam::369020531563:user/app-monitoring-archiver-*"
-        Sid      = "IAMManagement"
+        Sid      = "IAMUserManagement"
+      },
+      {
+        Action = [
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions",
+          "iam:CreatePolicyVersion",
+          "iam:DeletePolicyVersion",
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:iam::369020531563:policy/app-monitoring-archiver-*"
+        Sid      = "IAMPolicyManagement"
       },
       {
         Action = [
