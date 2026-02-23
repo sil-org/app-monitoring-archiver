@@ -67,3 +67,90 @@ $ go run main.go run -g "MyTeams Alerts" -s EG123ABC
 ```
 
 The SPREADSHEET_ID is the middle part of the url for the target Google Sheet when you just browse to it.
+
+## Terraform / OIDC
+
+Terraform Cloud authenticates to AWS using OIDC — no static access keys are needed.
+
+**Role name:** `app-monitoring-archiver-hcp-terraform`
+**Role ARN:** `arn:aws:iam::369020531563:role/app-monitoring-archiver-hcp-terraform`
+**OIDC provider:** `arn:aws:iam::369020531563:oidc-provider/app.terraform.io`
+
+### Trust policy
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::369020531563:oidc-provider/app.terraform.io"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "app.terraform.io:aud": "aws.workload.identity"
+        },
+        "StringLike": {
+          "app.terraform.io:sub": "organization:gtis:project:*:workspace:app-monitoring-archiver:run_phase:*"
+        }
+      }
+    }
+  ]
+}
+```
+
+### Permissions policy (inline, named `Deployment`)
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "IAMUserManagement",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateUser",
+        "iam:DeleteUser",
+        "iam:GetUser",
+        "iam:TagUser",
+        "iam:UntagUser",
+        "iam:ListUserTags",
+        "iam:CreateAccessKey",
+        "iam:DeleteAccessKey",
+        "iam:ListAccessKeys",
+        "iam:AttachUserPolicy",
+        "iam:DetachUserPolicy",
+        "iam:ListAttachedUserPolicies",
+        "iam:ListUserPolicies"
+      ],
+      "Resource": "arn:aws:iam::369020531563:user/app-monitoring-archiver-*"
+    },
+    {
+      "Sid": "IAMPolicyManagement",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreatePolicy",
+        "iam:DeletePolicy",
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:ListPolicyVersions",
+        "iam:ListPolicyTags",
+        "iam:CreatePolicyVersion",
+        "iam:DeletePolicyVersion",
+        "iam:TagPolicy",
+        "iam:UntagPolicy"
+      ],
+      "Resource": "arn:aws:iam::369020531563:policy/app-monitoring-archiver-*"
+    }
+  ]
+}
+```
+
+### TFC workspace environment variables
+
+| Key | Value |
+|---|---|
+| `TFC_AWS_PROVIDER_AUTH` | `true` |
+| `TFC_AWS_RUN_ROLE_ARN` | `arn:aws:iam::369020531563:role/app-monitoring-archiver-hcp-terraform` |
