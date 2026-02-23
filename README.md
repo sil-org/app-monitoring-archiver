@@ -73,8 +73,8 @@ The SPREADSHEET_ID is the middle part of the url for the target Google Sheet whe
 Terraform Cloud authenticates to AWS using OIDC — no static access keys are needed.
 
 **Role name:** `app-monitoring-archiver-hcp-terraform`
-**Role ARN:** `arn:aws:iam::369020531563:role/app-monitoring-archiver-hcp-terraform`
-**OIDC provider:** `arn:aws:iam::369020531563:oidc-provider/app.terraform.io`
+**Role ARN:** `arn:aws:iam::${AWS_ACCOUNT_ID}:role/app-monitoring-archiver-hcp-terraform`
+**OIDC provider:** `arn:aws:iam::${AWS_ACCOUNT_ID}:oidc-provider/app.terraform.io`
 
 ### Trust policy
 
@@ -85,7 +85,7 @@ Terraform Cloud authenticates to AWS using OIDC — no static access keys are ne
     {
       "Effect": "Allow",
       "Principal": {
-        "Federated": "arn:aws:iam::369020531563:oidc-provider/app.terraform.io"
+        "Federated": "arn:aws:iam::${AWS_ACCOUNT_ID}:oidc-provider/app.terraform.io"
       },
       "Action": "sts:AssumeRoleWithWebIdentity",
       "Condition": {
@@ -125,7 +125,7 @@ Terraform Cloud authenticates to AWS using OIDC — no static access keys are ne
         "iam:ListAttachedUserPolicies",
         "iam:ListUserPolicies"
       ],
-      "Resource": "arn:aws:iam::369020531563:user/app-monitoring-archiver-*"
+      "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:user/app-monitoring-archiver-*"
     },
     {
       "Sid": "IAMPolicyManagement",
@@ -142,7 +142,7 @@ Terraform Cloud authenticates to AWS using OIDC — no static access keys are ne
         "iam:TagPolicy",
         "iam:UntagPolicy"
       ],
-      "Resource": "arn:aws:iam::369020531563:policy/app-monitoring-archiver-*"
+      "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/app-monitoring-archiver-*"
     }
   ]
 }
@@ -153,4 +153,4 @@ Terraform Cloud authenticates to AWS using OIDC — no static access keys are ne
 | Key | Value |
 |---|---|
 | `TFC_AWS_PROVIDER_AUTH` | `true` |
-| `TFC_AWS_RUN_ROLE_ARN` | `arn:aws:iam::369020531563:role/app-monitoring-archiver-hcp-terraform` |
+| `TFC_AWS_RUN_ROLE_ARN` | `arn:aws:iam::${AWS_ACCOUNT_ID}:role/app-monitoring-archiver-hcp-terraform` |
