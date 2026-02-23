@@ -67,26 +67,6 @@ resource "aws_iam_role_policy" "hcp" {
         Resource = "arn:aws:iam::369020531563:policy/app-monitoring-archiver-*"
         Sid      = "IAMPolicyManagement"
       },
-      {
-        Action = [
-          "iam:CreateRole",
-          "iam:DeleteRole",
-          "iam:GetRole",
-          "iam:UpdateRole",
-          "iam:UpdateAssumeRolePolicy",
-          "iam:TagRole",
-          "iam:UntagRole",
-          "iam:ListRoleTags",
-          "iam:GetRolePolicy",
-          "iam:PutRolePolicy",
-          "iam:DeleteRolePolicy",
-          "iam:ListRolePolicies",
-          "iam:ListAttachedRolePolicies",
-        ]
-        Effect   = "Allow"
-        Resource = "arn:aws:iam::369020531563:role/app-monitoring-archiver-hcp-terraform"
-        Sid      = "RoleSelfManagement"
-      },
     ]
   })
 }
