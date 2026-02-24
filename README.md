@@ -72,10 +72,6 @@ The SPREADSHEET_ID is the middle part of the url for the target Google Sheet whe
 
 Terraform Cloud authenticates to AWS using OIDC — no static access keys are needed.
 
-**Role name:** `app-monitoring-archiver-hcp-terraform`
-**Role ARN:** `arn:aws:iam::${AWS_ACCOUNT_ID}:role/app-monitoring-archiver-hcp-terraform`
-**OIDC provider:** `arn:aws:iam::${AWS_ACCOUNT_ID}:oidc-provider/app.terraform.io`
-
 ### Trust policy
 
 ```json
