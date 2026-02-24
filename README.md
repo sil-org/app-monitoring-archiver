@@ -89,7 +89,7 @@ Terraform Cloud authenticates to AWS using OIDC — no static access keys are ne
           "app.terraform.io:aud": "aws.workload.identity"
         },
         "StringLike": {
-          "app.terraform.io:sub": "organization:gtis:project:*:workspace:app-monitoring-archiver:run_phase:*"
+          "app.terraform.io:sub": "organization:${org}:project:*:workspace:app-monitoring-archiver:run_phase:*"
         }
       }
     }
