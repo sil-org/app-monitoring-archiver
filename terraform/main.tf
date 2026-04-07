@@ -1,3 +1,9 @@
+locals {
+  aws_account = data.aws_caller_identity.this.account_id
+}
+
+data "aws_caller_identity" "this" {}
+
 # Role for Continuous Deployment using CDK
 
 resource "aws_iam_role" "cd" {
@@ -31,7 +37,7 @@ resource "aws_iam_role_policy" "cd" {
     Statement = [{
       Effect   = "Allow"
       Action   = "sts:AssumeRole"
-      Resource = "arn:aws:iam::*:role/cdk-*"
+      Resource = "arn:aws:iam::${local.aws_account}:role/cdk-*"
     }]
   })
 }
