@@ -27,8 +27,8 @@ resource "aws_iam_role_policy" "cd" {
   role = aws_iam_role.cd.name
 
   policy = jsonencode({
-    "Version" : "2012-10-17"
-    "Statement" : [{
+    Version = "2012-10-17"
+    Statement = [{
       Effect   = "Allow"
       Action   = "sts:AssumeRole"
       Resource = "arn:aws:iam::*:role/cdk-*"
