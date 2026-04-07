@@ -1,3 +1,3 @@
-output "cdk_role_arn" {
+output "cd_role_arn" {
   value = aws_iam_role.cd.arn
 }
