@@ -50,7 +50,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v6
         id: configure-aws
         with:
-          aws-region: ${{ matrix.aws_region }}
+          aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.AWS_CD_ROLE_ARN }}
 
       - name: Build
