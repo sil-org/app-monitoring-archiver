@@ -1,7 +1,7 @@
 # Role for Continuous Deployment using CDK
 
 resource "aws_iam_role" "cd" {
-  description = "for GitHub Actions to deploy sil-org/idp-support-bot"
+  description = "for GitHub Actions to deploy ${var.github_repository}"
   name        = "${var.app_name}-cd"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
