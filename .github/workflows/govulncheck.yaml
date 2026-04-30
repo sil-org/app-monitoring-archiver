@@ -13,9 +13,9 @@ jobs:
     uses: sil-org/workflows/.github/workflows/govulncheck.yaml@main
     with:
       check-latest: false
-      go-version-file: 'src/go.mod'
+      go-version-file: './go.mod'
       go-version-input: ''
-      work-dir: 'src'
+      work-dir: '.'
       aws-region: ${{ vars.AWS_REGION }}
       aws-role: ${{ vars.AWS_CD_ROLE_ARN }}
       from-email: gtis_itse_alerts@groups.sil.org
