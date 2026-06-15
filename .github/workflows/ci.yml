@@ -65,11 +65,11 @@ jobs:
           CONTACT_GROUP_NAME: ${{ vars.CONTACT_GROUP_NAME }}
           COUNT_LIMIT: ${{ vars.COUNT_LIMIT }}
           PERIOD: ${{ vars.PERIOD }}
-          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-          GOOGLE_AUTH_CLIENT_EMAIL: ${{ secrets.GOOGLE_AUTH_CLIENT_EMAIL }}
-          GOOGLE_AUTH_PRIVATE_KEY_ID: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY_ID }}
+          SPREADSHEET_ID: ${{ vars.SPREADSHEET_ID }}
+          GOOGLE_AUTH_CLIENT_EMAIL: ${{ vars.GOOGLE_AUTH_CLIENT_EMAIL }}
+          GOOGLE_AUTH_PRIVATE_KEY_ID: ${{ vars.GOOGLE_AUTH_PRIVATE_KEY_ID }}
           GOOGLE_AUTH_PRIVATE_KEY: ${{ secrets.GOOGLE_AUTH_PRIVATE_KEY }}
-          GOOGLE_AUTH_TOKEN_URI: ${{ secrets.GOOGLE_AUTH_TOKEN_URI }}
+          GOOGLE_AUTH_TOKEN_URI: ${{ vars.GOOGLE_AUTH_TOKEN_URI }}
           APP_ENV: "prod"
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: cd cdk && cdk deploy --require-approval never
