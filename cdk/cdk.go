@@ -38,6 +38,8 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 	googleAuthPrivateKey := os.Getenv("GOOGLE_AUTH_PRIVATE_KEY")
 	googleAuthTokenURI := os.Getenv("GOOGLE_AUTH_TOKEN_URI")
 
+	sentryDSN := os.Getenv("SENTRY_DSN")
+
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
 	logGroup := awslogs.NewLogGroup(stack, jsii.String("LambdaLogGroup"), &awslogs.LogGroupProps{
@@ -55,6 +57,7 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 			"GOOGLE_AUTH_PRIVATE_KEY":    &googleAuthPrivateKey,
 			"GOOGLE_AUTH_TOKEN_URI":      &googleAuthTokenURI,
 			"APP_ENV":                    &envName,
+			"SENTRY_DSN":                 &sentryDSN,
 		},
 		FunctionName:  jsii.String(appName + "-" + customer + "-" + envName),
 		Handler:       jsii.String("bootstrap"),

@@ -25,13 +25,14 @@ type ArchiveToGoogleSheetsConfig struct {
 func main() {
 	if dsn := os.Getenv("SENTRY_DSN"); dsn != "" {
 		initSentry(dsn)
-		defer sentry.Flush(2 * time.Second)
 	}
 
 	lambda.Start(handler)
 }
 
 func handler(config ArchiveToGoogleSheetsConfig) error {
+	defer sentry.Flush(2 * time.Second)
+
 	if config.Period == "" {
 		config.Period = "LastMonth"
 	}
@@ -39,14 +40,14 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 	nodePingToken, err := getRequiredEnv(cmd.NodePingTokenKey)
 	if err != nil {
 		sentry.CaptureException(err)
-		log.Fatalln(err)
+		return err
 	}
 
 	intCountLimit, err := strconv.Atoi(config.CountLimit)
 	if err != nil {
 		err = fmt.Errorf("error converting CountLimit '%s' to integer: %w", config.CountLimit, err)
 		sentry.CaptureException(err)
-		log.Fatalln(err)
+		return err
 	}
 
 	err = googlesheets.ArchiveResultsForMonth(
@@ -58,7 +59,7 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 	)
 	if err != nil {
 		sentry.CaptureException(err)
-		log.Fatalln(err)
+		return err
 	}
 	return nil
 }
