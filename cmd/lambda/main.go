@@ -39,6 +39,7 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 	nodePingToken, err := getRequiredEnv(cmd.NodePingTokenKey)
 	if err != nil {
 		sentry.CaptureException(err)
+		sentry.Flush(2 * time.Second)
 		log.Fatalln(err)
 	}
 
@@ -46,6 +47,7 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 	if err != nil {
 		err = fmt.Errorf("error converting CountLimit '%s' to integer: %w", config.CountLimit, err)
 		sentry.CaptureException(err)
+		sentry.Flush(2 * time.Second)
 		log.Fatalln(err)
 	}
 
@@ -58,6 +60,7 @@ func handler(config ArchiveToGoogleSheetsConfig) error {
 	)
 	if err != nil {
 		sentry.CaptureException(err)
+		sentry.Flush(2 * time.Second)
 		log.Fatalln(err)
 	}
 	return nil
