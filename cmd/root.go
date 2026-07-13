@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -19,7 +19,8 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err.Error())
+		slog.Error("command failed", "error", err)
+		os.Exit(1)
 	}
 }
 
@@ -37,6 +38,7 @@ func init() {
 	nodePingToken = os.Getenv(NodePingTokenKey)
 
 	if nodePingToken == "" {
-		log.Fatal("Error: Environment variable for NODEPING_TOKEN is required to execute plan and migration")
+		slog.Error("required environment variable for plan execution and migration is missing", "env", NodePingTokenKey)
+		os.Exit(1)
 	}
 }

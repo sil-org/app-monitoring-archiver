@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"strconv"
 	"time"
@@ -70,7 +70,7 @@ func initSentry(dsn string) {
 		Environment: getEnv("APP_ENV", "prod"),
 	})
 	if err != nil {
-		log.Println("Sentry initialization failed:", err)
+		slog.Error("Sentry initialization failed", "error", err)
 	}
 }
 
