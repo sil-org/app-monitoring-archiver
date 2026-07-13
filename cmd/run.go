@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -21,11 +22,13 @@ var runCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if contactGroupName == "" {
-			log.Fatal(`Error: The 'contact-group' flag is required (e.g. -g "AppsDev Alerts").`)
+			slog.Error("required flag is missing", "flag", "contact-group", "example", `-g "AppsDev Alerts"`)
+			os.Exit(1)
 		}
 
 		if spreadsheetID == "" {
-			log.Fatal(`Error: The 'spreadsheetID' flag is required (found in its url).`)
+			slog.Error("required flag is missing", "flag", "spreadsheetID")
+			os.Exit(1)
 		}
 
 		runArchive()
@@ -60,6 +63,7 @@ func init() {
 func runArchive() {
 	err := googlesheets.ArchiveResultsForMonth(contactGroupName, "LastMonth", spreadsheetID, nodePingToken, countLimit)
 	if err != nil {
-		log.Fatal(err.Error())
+		slog.Error("archive failed", "error", err)
+		os.Exit(1)
 	}
 }

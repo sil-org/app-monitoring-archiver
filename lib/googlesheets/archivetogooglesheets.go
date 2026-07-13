@@ -2,7 +2,7 @@ package googlesheets
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -178,7 +178,7 @@ func EnsureCheckRowExists(nodePingCheck, year string, sheetsData SheetsData) (in
 
 	if insertRow {
 		row := chosenRow - 1 // It must be doing an "insert below"
-		log.Printf("Inserting row above row %d for NodePing check %s", chosenRow, nodePingCheck)
+		slog.Info("inserting row for NodePing check", "row", chosenRow, "check", nodePingCheck)
 		if err := InsertRow(int64(row), sheetID, spreadsheetID, srv); err != nil {
 			return 0, fmt.Errorf("error inserting a row in Google sheets: %w", err)
 		}

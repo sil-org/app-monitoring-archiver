@@ -2,7 +2,7 @@ package googlesheets
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -147,7 +147,8 @@ func GetRequiredEnvVar(envName string) string {
 	envVar := os.Getenv(envName)
 
 	if envVar == "" {
-		log.Fatalf("Error: Environment variable for %s is required", envName)
+		slog.Error("required environment variable is missing", "env", envName)
+		os.Exit(1)
 	}
 
 	return envVar
