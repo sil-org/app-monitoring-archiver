@@ -41,6 +41,7 @@ resource "aws_iam_role_policy" "cd" {
     Version = "2012-10-17"
     Statement = [
       {
+        Sid      = "AssumeRoleForCDK"
         Effect   = "Allow"
         Action   = "sts:AssumeRole"
         Resource = "arn:aws:iam::${local.aws_account}:role/cdk-*"
