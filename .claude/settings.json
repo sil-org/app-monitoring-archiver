@@ -2,12 +2,12 @@
   "sandbox": {
     "filesystem": {
       "allowRead": ["."],
-      "denyRead": ["./.env"]
+      "denyRead": ["./local.env"]
     }
   },
   "permissions": {
     "deny": [
-      "Read(./.env)"
+      "Read(./local.env)"
     ]
   }
 }
