@@ -18,5 +18,5 @@ jobs:
       work-dir: '.'
       aws-region: ${{ vars.AWS_REGION }}
       aws-role: ${{ vars.AWS_CD_ROLE_ARN }}
-      from-email: gtis_itse_alerts@groups.sil.org
+      from-email: app_monitoring_archiver@ses.sil.org
       to-email: gtis_itse_support+notifications@sil.org
