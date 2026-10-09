@@ -1,12 +1,12 @@
 package googlesheets
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
 	"strings"
 
-	"golang.org/x/net/context"
 	"google.golang.org/api/sheets/v4"
 )
 
