@@ -50,7 +50,7 @@ To build and deploy:
 * Build the Go binary:
 
 ```sh
-CGO_ENABLED=0 go build -tags lambda.norpc -ldflags="-s -w" -o bin/bootstrap cmd/lambda/main.go
+CGO_ENABLED=0 go build -tags lambda.norpc -ldflags="-s -w" -o cmd/bootstrap cmd/lambda/main.go
 ```
 
 * Deploy using CDK:
