@@ -3,7 +3,7 @@ module github.com/sil-org/app-monitoring-archiver
 // Ensure this tracks with Dockerfile
 go 1.27
 
-toolchain go1.27.2
+toolchain go1.27.3
 
 require (
 	github.com/aws/aws-lambda-go v1.51.0
